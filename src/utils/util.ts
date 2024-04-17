@@ -17,3 +17,5 @@ export const isEmpty = (value: string | number | object): boolean => {
     return false;
   }
 };
+
+export type ValueOf<T> = T[keyof T];

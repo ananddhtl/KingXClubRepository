@@ -1,24 +1,15 @@
-# Common build stage
-FROM node:14.14.0-alpine3.12 as common-build-stage
+FROM node:18-alpine as build-env
+RUN apk update
+RUN apk upgrade
 
-COPY . ./app
-
-WORKDIR /app
-
-RUN npm install
-
+WORKDIR /usr/app
+COPY package*.json ./
+RUN npm install --no-fund --no-audit
+COPY . .
+RUN npm run build && npm prune --production
 EXPOSE 3000
-
-# Development build stage
-FROM common-build-stage as development-build-stage
-
-ENV NODE_ENV development
-
-CMD ["npm", "run", "dev"]
-
-# Production build stage
-FROM common-build-stage as production-build-stage
-
-ENV NODE_ENV production
-
-CMD ["npm", "run", "start"]
+FROM gcr.io/distroless/nodejs18-debian11
+WORKDIR /usr/app
+COPY --from=build-env /usr/app/dist /usr/app/dist
+COPY --from=build-env /usr/app/node_modules ./node_modules
+CMD ["dist/server.js"]

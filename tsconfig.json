@@ -1,15 +1,18 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "target": "es2017",
+    "target": "ES2022",
     "lib": ["es2017", "esnext.asynciterable"],
     "typeRoots": ["node_modules/@types"],
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
     "moduleResolution": "node",
-    "module": "commonjs",
+    "skipLibCheck": true,
+    "module": "NodeNext",
     "pretty": true,
     "sourceMap": true,
     "declaration": true,
@@ -19,6 +22,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "importHelpers": true,
+    "alwaysStrict": true,
     "baseUrl": "src",
     "paths": {
       "@/*": ["*"],

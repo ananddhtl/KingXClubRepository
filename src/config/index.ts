@@ -1,5 +1,6 @@
-import { config } from 'dotenv';
-config({ path: `.env.${process.env.NODE_ENV || 'development'}.local` });
+import AppConfig from './app.config';
+import AuthConfig from './auth.config';
+import EmailConfig from './email.config';
+import AWSConfig from './aws.config';
 
-export const CREDENTIALS = process.env.CREDENTIALS === 'true';
-export const { NODE_ENV, PORT, DB_HOST, DB_PORT, DB_DATABASE, LOG_FORMAT, LOG_DIR, ORIGIN } = process.env;
+export { AppConfig, AuthConfig, EmailConfig, AWSConfig };
