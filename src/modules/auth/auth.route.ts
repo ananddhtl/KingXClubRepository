@@ -21,15 +21,6 @@ class AuthRoute implements Routes {
   }
 
   private initializeRoutes() {
-    //authenticate the user using google
-    this.router.get(
-      '/google/redirect',
-      passport.authenticate('google', {
-        successRedirect: AppConfig.client_url,
-        failureRedirect: `${AppConfig.client_url}/login/failed`,
-      }),
-    );
-    this.router.get(`${this.path}/google`, AuthController.googleAuth);
     this.router.post(`${this.path}/login`, [validationMiddleware(LoginDto, 'body')], AuthController.login);
     this.router.post(`${this.path}/register`, [validationMiddleware(RegisterDto, 'body')], AuthController.register);
     this.router.post(`${this.path}/logout`, [validationMiddleware(LogoutDto, 'body'), authMiddleware], AuthController.logout);

@@ -12,7 +12,9 @@ const authMiddleware = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const token = req.cookies.jwt || req.headers.authorization;
+  const token = req.cookies.jwt || req.headers.authorization.split(' ')[1];
+  console.log({ token });
+
   if (token) {
     try {
       const decoded = verify(token, AuthConfig.accessToken.secretKey);

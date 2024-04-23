@@ -1,20 +1,8 @@
 import bcrypt from 'bcryptjs';
-import { Document, model, Schema } from 'mongoose';
+import { model, Schema } from 'mongoose';
 import { NextFunction } from 'express';
 
-import { IAddress, IUserDocument, ROLE } from './user.interface';
-
-const addressSchema: Schema<IAddress & Document> = new Schema({
-  street: {
-    type: String,
-  },
-  city: {
-    type: String,
-  },
-  zip: {
-    type: Number,
-  },
-});
+import { IUserDocument } from './user.interface';
 
 const UserSchema: Schema<IUserDocument> = new Schema({
   email: {
@@ -35,8 +23,7 @@ const UserSchema: Schema<IUserDocument> = new Schema({
     unique: true,
     sparse: true,
   },
-  address: addressSchema,
-  role: { type: String, enum: Object.values(ROLE), default: ROLE.CONSUMER },
+  amount: { type: Number, default: 0 },
 });
 
 UserSchema.pre<IUserDocument>('save', function (next: NextFunction) {

@@ -3,7 +3,7 @@ import UserController from './user.controller';
 import { AppConfig } from '@/config';
 import { Routes } from '@/interfaces/routes.interface';
 import authMiddleware from '@/middlewares/auth.middleware';
-import { adminOnly, currentOnly } from '@/middlewares/access.middleware';
+import { adminOnly } from '@/middlewares/access.middleware';
 
 class UserRoute implements Routes {
   public path = `/${AppConfig.versioning}/user`;
@@ -19,8 +19,8 @@ class UserRoute implements Routes {
     this.router.get(`${this.path}/all`, [authMiddleware, adminOnly()], UserController.findAll);
     this.router
       .route(`${this.path}/:userId`)
-      .put([authMiddleware, currentOnly()], UserController.updateById)
-      .get([authMiddleware, currentOnly()], UserController.findById)
+      .put([authMiddleware, adminOnly()], UserController.updateById)
+      .get([authMiddleware, adminOnly()], UserController.findById)
       .delete([authMiddleware, adminOnly()], UserController.deleteById);
   }
 }

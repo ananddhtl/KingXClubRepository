@@ -1,0 +1,33 @@
+import { ITicketDocument } from './ticket.interface';
+import { model, Schema } from 'mongoose';
+
+const TicketSchema: Schema<ITicketDocument> = new Schema({
+  ticket: {
+    type: Number,
+    required: true,
+  },
+  amount: {
+    type: Number,
+    required: true,
+  },
+  result: {
+    type: Number,
+    default: -1,
+  },
+  returns: {
+    type: Number,
+    required: true,
+  },
+  place: {
+    type: String,
+    required: true,
+  },
+  won: { type: Boolean, default: false },
+  user: { type: Schema.Types.ObjectId, required: true },
+  time: { type: Date, required: true },
+  createdAt: { type: Date, default: Date.now },
+});
+
+const TicketModel = model<ITicketDocument>('ticket', TicketSchema);
+
+export default TicketModel;

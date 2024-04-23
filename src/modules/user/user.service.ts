@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { IUserDocument } from './user.interface';
 import UserModel from './user.modal';
 import { MessagesMapping } from '@/config/messages-mapping';
-import { CreateUserDto } from './dtos/create-user.dto';
 import { BaseService } from '../base/base.service';
 
 @Injectable()
