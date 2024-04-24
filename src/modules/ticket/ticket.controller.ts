@@ -21,24 +21,24 @@ export class TicketController {
   // Route: POST: /v1/category/create
   public buyTicket = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { place, ticketNumber, betAmount, betDate, ticket }: BuyTicketDto = req.body;
+      const { place, digit, amount, time, ticket }: BuyTicketDto = req.body;
       const user = req.user as unknown as IUserDocument;
-      let returns;
-      if (Number(ticket) === 3) {
-        returns = 1000;
-      } else if (Number(ticket) === 2) {
-        returns = 100;
-      } else if (Number(ticket) === 1) {
-        returns = 10;
+      let percentage;
+      if (digit === 3) {
+        percentage = 999;
+      } else if (digit === 2) {
+        percentage = 499;
+      } else if (digit === 1) {
+        percentage = 9;
       }
-      console.log({ place });
 
       const response = await this.ticketService.buyTicket({
-        ticket: Number(ticketNumber),
+        ticket,
         place,
-        time: new Date(Number(betDate)),
-        amount: Number(betAmount),
-        returns: Number(betAmount) * returns,
+        digit,
+        time: new Date(time),
+        amount,
+        returns: amount * percentage,
         user: user._id,
       });
       return res.status(HttpStatus.OK).send(response);
@@ -83,7 +83,7 @@ export class TicketController {
             $gte: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 5),
             $lt: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
           },
-          won: true, // Filter for documents where 'won' is true
+          won: false, // Filter for documents where 'won' is true
         },
       },
       {
@@ -115,25 +115,11 @@ export class TicketController {
     return res.status(HttpStatus.OK).send(response);
   };
 
-  // Route: POST: /v1/category/create
-  public publishResult = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { timestamp, place, result } = req.body;
-      const response = await this.ticketService.publishResult(timestamp, place, result);
-      //@TODO : Update user balance
-
-      return res.status(HttpStatus.OK).send(response);
-    } catch (error) {
-      console.error('Error in logging:', error);
-      return next(error);
-    }
-  };
-
   // Route: GET: /v1/category/all
   public getResults = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { timestamp, place, result } = req.body;
-      const response = await this.ticketService.find({});
+      const response = await this.ticketService.find({ place, tim });
       return res.status(HttpStatus.OK).send(response);
     } catch (error) {
       console.error('Error in logging:', error);

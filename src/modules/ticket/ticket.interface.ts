@@ -2,9 +2,9 @@ import { Document, ObjectId } from 'mongoose';
 
 export interface ITicket {
   place: string;
-  result?: number;
   time: Date;
   ticket: number;
+  digit: number;
   amount: number;
   returns: number;
   won?: boolean;

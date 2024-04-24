@@ -1,21 +1,13 @@
 import { IsDate, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class BuyTicketDto {
+export class PublishResultDto {
   @IsString()
   @IsNotEmpty()
   place: string;
 
   @IsNumber()
   @IsOptional()
-  digit: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  ticket: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  amount: number;
+  result: number;
 
   @IsNumber()
   @IsNotEmpty()

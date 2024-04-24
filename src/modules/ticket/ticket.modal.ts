@@ -10,10 +10,6 @@ const TicketSchema: Schema<ITicketDocument> = new Schema({
     type: Number,
     required: true,
   },
-  result: {
-    type: Number,
-    default: -1,
-  },
   returns: {
     type: Number,
     required: true,
