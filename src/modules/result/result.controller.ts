@@ -18,10 +18,8 @@ export class ResultController {
   // Route: POST: /v1/category/create
   public publishResult = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { timestamp, place, result } = req.body;
-      const response = await this.resultService.publishResult(timestamp, place, result);
-      //@TODO : Update user balance
-
+      const { time, place, result } = req.body;
+      const response = await this.resultService.publishResult(time, place, result);
       return res.status(HttpStatus.OK).send(response);
     } catch (error) {
       console.error('Error in logging:', error);
@@ -30,10 +28,10 @@ export class ResultController {
   };
 
   // Route: GET: /v1/category/all
-  public getResults = async (req: Request, res: Response, next: NextFunction) => {
+  public getResult = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { timestamp, place, result } = req.body;
-      const response = await this.resultService.find({ place, tim });
+      const { time, place } = req.query;
+      const response = await this.resultService.find({ place, time: new Date(time as string) });
       return res.status(HttpStatus.OK).send(response);
     } catch (error) {
       console.error('Error in logging:', error);

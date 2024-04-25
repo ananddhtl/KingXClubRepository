@@ -2,11 +2,12 @@ import { Document } from 'mongoose';
 
 export interface IResult {
   place: string;
-  result?: number;
+  result: number;
   time: Date;
-  totalAmount: number;
-  totalReturns: number;
-  totalTicket: number;
+  winnerCount: number;
+  totalDistributedAmount: number;
+  totalCollectedAmount: number;
+  ticketCount: number;
   createdAt?: Date;
 }
 

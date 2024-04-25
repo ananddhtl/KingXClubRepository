@@ -14,15 +14,19 @@ const ResultSchema: Schema<IResultDocument> = new Schema({
     type: Date,
     required: true,
   },
-  totalAmount: {
+  winnerCount: {
     type: Number,
     required: true,
   },
-  totalReturns: {
+  totalDistributedAmount: {
     type: Number,
     required: true,
   },
-  totalTicket: {
+  totalCollectedAmount: {
+    type: Number,
+    required: true,
+  },
+  ticketCount: {
     type: Number,
     required: true,
   },

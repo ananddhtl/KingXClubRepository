@@ -16,8 +16,9 @@ class ResultRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.post(`${this.path}/buy`, [validationMiddleware(PublishResultDto, 'body'), authMiddleware], ResultController.publishResult);
+    this.router.post(`${this.path}/publish`, [validationMiddleware(PublishResultDto, 'body')], ResultController.publishResult);
     this.router.get(`${this.path}/all`, ResultController.findAll);
+    this.router.get(`${this.path}/get`, ResultController.getResult);
     this.router
       .route(`${this.path}/:id`)
       .get(ResultController.findById)

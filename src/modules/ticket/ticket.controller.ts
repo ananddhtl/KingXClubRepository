@@ -27,7 +27,7 @@ export class TicketController {
       if (digit === 3) {
         percentage = 999;
       } else if (digit === 2) {
-        percentage = 499;
+        percentage = 99;
       } else if (digit === 1) {
         percentage = 9;
       }
@@ -41,7 +41,7 @@ export class TicketController {
         returns: amount * percentage,
         user: user._id,
       });
-      return res.status(HttpStatus.OK).send(response);
+      return res.status(HttpStatus.OK).send({ ...response.toObject(), message: 'Ticket purchased successfully' });
     } catch (error) {
       console.error('Error in logging:', error);
       return next(error);
@@ -74,6 +74,25 @@ export class TicketController {
     return res.status(HttpStatus.OK).send(response);
   };
 
+  public getTodayPurchasedTicket = async (req: Request, res: Response, next: NextFunction) => {
+    const today = new Date();
+
+    const pipeline = [
+      {
+        $match: {
+          time: {
+            $gte: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
+            $lt: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
+          },
+        },
+      },
+    ];
+
+    const response = await this.ticketService.repository.aggregate(pipeline);
+
+    return res.status(HttpStatus.OK).send(response);
+  };
+
   public getLuckyWinners = async (req: Request, res: Response, next: NextFunction) => {
     const today = new Date();
     const pipeline = [
@@ -83,7 +102,7 @@ export class TicketController {
             $gte: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 5),
             $lt: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
           },
-          won: false, // Filter for documents where 'won' is true
+          won: true, // Filter for documents where 'won' is true
         },
       },
       {
@@ -113,18 +132,6 @@ export class TicketController {
       return data;
     });
     return res.status(HttpStatus.OK).send(response);
-  };
-
-  // Route: GET: /v1/category/all
-  public getResults = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { timestamp, place, result } = req.body;
-      const response = await this.ticketService.find({ place, tim });
-      return res.status(HttpStatus.OK).send(response);
-    } catch (error) {
-      console.error('Error in logging:', error);
-      return next(error);
-    }
   };
 
   // Route: GET: /v1/category/all
