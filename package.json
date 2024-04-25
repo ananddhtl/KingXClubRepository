@@ -1,8 +1,8 @@
 {
-  "name": "wg-bg-service",
-  "version": "0.0.0",
-  "description": "TypeScript + Mongoose + MongoDB + Express API Server",
-  "author": "",
+  "name": "matkakingdubai",
+  "version": "1.0.0",
+  "description": "Matkakingdubai Base App Server",
+  "author": "Kohinoor",
   "license": "ISC",
   "scripts": {
     "start": "npm run build && cross-env NODE_ENV=production node dist/server.js",
@@ -13,7 +13,7 @@
     "lint": "eslint --ignore-path .gitignore --ext .ts src/",
     "lint:fix": "npm run lint -- --fix",
     "deploy:prod": "npm run build && pm2 start ecosystem.config.js --only prod",
-    "deploy:dev": "pm2 start ecosystem.config.js --only dev"
+    "deploy:dev": "npm run build && pm2 start ecosystem.config.js --only dev"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.4",

@@ -3,7 +3,7 @@ import AuthRoute from '@/modules/auth/auth.route';
 import UserRoute from './modules/user/user.route';
 import TicketRoute from './modules/ticket/ticket.route';
 import ResultRoute from './modules/result/result.route';
-import validateEnv from '@utils/validateEnv';
+import validateEnv from '@/utils/validateEnv';
 
 validateEnv();
 
