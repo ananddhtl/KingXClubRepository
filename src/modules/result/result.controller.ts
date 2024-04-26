@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { Controller, HttpStatus } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import ResultService from './result.service';
 
-@Controller('result')
 export class ResultController {
   static instance: null | ResultController;
 

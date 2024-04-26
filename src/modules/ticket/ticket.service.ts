@@ -1,11 +1,10 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException } from '@nestjs/common';
 import { BaseService } from '../base/base.service';
 import { ITicket, ITicketDocument } from './ticket.interface';
 import UserService from '../user/user.service';
 import httpStatus from 'http-status';
 import TicketModel from './ticket.modal';
 
-@Injectable()
 export class TicketService extends BaseService<ITicketDocument> {
   static instance: null | TicketService;
 

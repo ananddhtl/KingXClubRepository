@@ -1,4 +1,4 @@
-import { Controller, HttpStatus } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
 import { LoginDto } from './dtos/login.dto';
@@ -10,7 +10,6 @@ import { TokenDto } from './dtos/token.dto';
 import AuthService from './auth.service';
 import { NextFunction, Request, Response } from 'express';
 
-@Controller('auth')
 export class AuthController {
   static instance: null | AuthController;
 

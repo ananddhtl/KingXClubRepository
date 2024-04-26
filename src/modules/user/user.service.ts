@@ -1,10 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { IUserDocument } from './user.interface';
 import UserModel from './user.modal';
 import { MessagesMapping } from '@/config/messages-mapping';
 import { BaseService } from '../base/base.service';
 
-@Injectable()
 export class UserService extends BaseService<IUserDocument> {
   static instance: null | UserService;
 

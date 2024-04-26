@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import moment from 'moment';
 import { Types } from 'mongoose';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 import { MessagesMapping } from '@/config/messages-mapping';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
@@ -18,7 +18,6 @@ import TokenModal from './token.modal';
 import { MailService } from '@/services/mail.service';
 import { AuthConfig } from '@/config';
 
-@Injectable()
 export class AuthService {
   static instance: null | AuthService;
 

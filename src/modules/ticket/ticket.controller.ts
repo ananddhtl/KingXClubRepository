@@ -1,10 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { Controller, HttpStatus } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import TicketService from './ticket.service';
 import { BuyTicketDto } from './dtos/buy-ticket.dto';
 import { IUserDocument } from '../user/user.interface';
 
-@Controller('ticket')
 export class TicketController {
   static instance: null | TicketController;
 

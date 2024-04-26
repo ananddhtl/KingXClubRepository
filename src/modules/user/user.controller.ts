@@ -1,10 +1,8 @@
-import { Controller, HttpStatus } from '@nestjs/common';
-import { CreateUserDto } from './dtos/create-user.dto';
+import { HttpStatus } from '@nestjs/common';
 import UserService from './user.service';
 import { Request, Response, NextFunction } from 'express';
-import { IUser, IUserDocument } from './user.interface';
+import { IUserDocument } from './user.interface';
 
-@Controller('user')
 export class UserController {
   static instance: null | UserController;
 
