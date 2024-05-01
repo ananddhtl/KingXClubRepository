@@ -20,13 +20,13 @@ export class TicketService extends BaseService<ITicketDocument> {
     return this.instance;
   }
 
-  async buyTicket(buyticket: ITicket): Promise<ITicketDocument> {
-    const result = await this.repository.create(buyticket);
+  async buyTicket(userId: string, buyticket: ITicket[], totalAmount: number) {
     //Deduct User amount
-    const user = await UserService.findOne({ _id: buyticket.user });
-    if (user.amount < buyticket.amount) throw new HttpException('Balance not available to buy ticket', httpStatus.FORBIDDEN);
-    await UserService.updateOne({ _id: buyticket.user }, { $inc: { amount: -buyticket.amount } });
+    const user = await UserService.findOne({ _id: userId });
+    if (user.amount < totalAmount) throw new HttpException('Balance not available to buy ticket', httpStatus.FORBIDDEN);
+    await UserService.updateOne({ _id: userId }, { $inc: { amount: -totalAmount } });
 
+    const result = await this.repository.create(buyticket);
     return result;
   }
 }

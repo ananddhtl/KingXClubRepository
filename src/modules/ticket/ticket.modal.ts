@@ -18,6 +18,9 @@ const TicketSchema: Schema<ITicketDocument> = new Schema({
     type: String,
     required: true,
   },
+  position: {
+    type: String,
+  },
   won: { type: Boolean, default: false },
   user: { type: Schema.Types.ObjectId, required: true },
   time: { type: Date, required: true },

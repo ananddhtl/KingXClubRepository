@@ -23,7 +23,7 @@ const authMiddleware = async (
     } catch (error) {
       console.error(error);
       res.status(401);
-      throw new Error('Not authorized, token failed');
+      next(new HttpException('Not authorized, token failed', httpStatus.UNAUTHORIZED));
     }
   } else {
     next(new HttpException(MessagesMapping['#1'], httpStatus.BAD_REQUEST));

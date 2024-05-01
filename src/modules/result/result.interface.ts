@@ -2,10 +2,15 @@ import { Document } from 'mongoose';
 
 export interface IResult {
   place: string;
-  result: number;
+  leftTicketNumber: number;
+  rightTicketNumber: number;
   time: Date;
-  winnerCount: number;
-  totalDistributedAmount: number;
+  winnerCountLeft: number;
+  totalDistributedAmountLeft: number;
+  winnerCountRight: number;
+  totalDistributedAmountRight: number;
+  winnerCountDouble: number;
+  totalDistributedAmountDouble: number;
   totalCollectedAmount: number;
   ticketCount: number;
   createdAt?: Date;

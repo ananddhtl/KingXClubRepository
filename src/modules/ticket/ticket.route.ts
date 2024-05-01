@@ -18,6 +18,7 @@ class BetRoute implements Routes {
   private initializeRoutes() {
     this.router.post(`${this.path}/buy`, [validationMiddleware(BuyTicketDto, 'body'), authMiddleware], TicketController.buyTicket);
     this.router.get(`${this.path}/all`, TicketController.findAll);
+    this.router.get(`${this.path}/me`, TicketController.findAllTicketPurchased);
     this.router.get(`${this.path}/today`, TicketController.getTodayTicketDetails);
     this.router.get(`${this.path}/today/all`, TicketController.getTodayPurchasedTicket);
     this.router.get(`${this.path}/lucky-winners`, TicketController.getLuckyWinners);

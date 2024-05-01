@@ -2,6 +2,7 @@ import { Document, ObjectId } from 'mongoose';
 
 export interface ITicket {
   place: string;
+  position: string;
   time: Date;
   ticket: number;
   digit: number;

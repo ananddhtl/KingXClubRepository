@@ -20,27 +20,26 @@ export class TicketController {
   // Route: POST: /v1/category/create
   public buyTicket = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { place, digit, amount, time, ticket }: BuyTicketDto = req.body;
+      const { place, tickets }: BuyTicketDto = req.body;
       const user = req.user as unknown as IUserDocument;
-      let percentage;
-      if (digit === 3) {
-        percentage = 999;
-      } else if (digit === 2) {
-        percentage = 99;
-      } else if (digit === 1) {
-        percentage = 9;
-      }
+      let totalAmount = 0;
 
-      const response = await this.ticketService.buyTicket({
-        ticket,
-        place,
-        digit,
-        time: new Date(time),
-        amount,
-        returns: amount * percentage,
-        user: user._id,
+      const data = tickets.map(({ ticket, amount, time, position }) => {
+        totalAmount = totalAmount + amount;
+        return {
+          ticket,
+          amount,
+          position,
+          time: new Date(time),
+          place,
+          digit: ticket % 10,
+          returns: amount * (ticket % 10 === 3 ? 999 : ticket % 10 === 2 ? 499 : 99),
+          user: user._id,
+        };
       });
-      return res.status(HttpStatus.OK).send({ ...response.toObject(), message: 'Ticket purchased successfully' });
+
+      const response = await this.ticketService.buyTicket(user._id, data, totalAmount);
+      return res.status(HttpStatus.OK).send({ ...response, amount: totalAmount, message: 'Ticket purchased successfully' });
     } catch (error) {
       console.error('Error in logging:', error);
       return next(error);
@@ -87,9 +86,34 @@ export class TicketController {
       },
     ];
 
-    const response = await this.ticketService.repository.aggregate(pipeline);
+    const numberPipeline = [
+      {
+        $match: {
+          time: {
+            $gte: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
+            $lt: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            ticket: '$ticket',
+            place: '$place',
+            position: '$position',
+          }, // Group by place field
+          count: { $count: {} }, // Count of documents for this place today
+          totalAmount: { $sum: '$amount' }, // Total amount for this place today
+          returnAmount: { $sum: '$returns' }, // Total amount for this place today
+          time: { $first: '$time' },
+        },
+      },
+    ];
 
-    return res.status(HttpStatus.OK).send(response);
+    const response = await this.ticketService.repository.aggregate(pipeline);
+    const numAggregateResponse = await this.ticketService.repository.aggregate(numberPipeline);
+
+    return res.status(HttpStatus.OK).send({ data: response, summary: numAggregateResponse });
   };
 
   public getLuckyWinners = async (req: Request, res: Response, next: NextFunction) => {
@@ -137,6 +161,18 @@ export class TicketController {
   public findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response = await this.ticketService.find({});
+      return res.status(HttpStatus.OK).send(response);
+    } catch (error) {
+      console.error('Error in logging:', error);
+      return next(error);
+    }
+  };
+
+  // Route: GET: /v1/category/all
+  public findAllTicketPurchased = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as unknown as IUserDocument;
+      const response = await this.ticketService.find({ user: user._id });
       return res.status(HttpStatus.OK).send(response);
     } catch (error) {
       console.error('Error in logging:', error);

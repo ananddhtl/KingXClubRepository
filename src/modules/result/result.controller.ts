@@ -17,8 +17,8 @@ export class ResultController {
   // Route: POST: /v1/category/create
   public publishResult = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { time, place, result } = req.body;
-      const response = await this.resultService.publishResult(time, place, result);
+      const { time, place, leftTicketNumber, rightTicketNumber } = req.body;
+      const response = await this.resultService.publishResult(time, place, leftTicketNumber, rightTicketNumber);
       return res.status(HttpStatus.OK).send(response);
     } catch (error) {
       console.error('Error in logging:', error);

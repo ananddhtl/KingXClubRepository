@@ -6,8 +6,12 @@ export class PublishResultDto {
   place: string;
 
   @IsNumber()
-  @IsOptional()
-  result: number;
+  @IsNotEmpty()
+  leftTicketNumber: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  rightTicketNumber: number;
 
   @IsNumber()
   @IsNotEmpty()

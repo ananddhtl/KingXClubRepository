@@ -21,16 +21,26 @@ export class ResultService extends BaseService<IResultDocument> {
     return this.instance;
   }
 
-  async publishResult(time: number, place: string, result: number) {
+  sumOfDigits(number) {
+    return String(number)
+      .split('')
+      .reduce((sum, digit) => sum + parseInt(digit), 0);
+  }
+
+  async publishResult(time: number, place: string, leftTicketNumber: number, rightTicketNumber: number) {
     const hasAlreadyPublished = await this.repository.findOne({ time, place });
     console.log(hasAlreadyPublished);
 
     if (hasAlreadyPublished) throw new HttpException('result already released', httpStatus.CONFLICT);
+    const resultDate = new Date(time);
 
     const ticketPurchasePipeline = [
       {
         $match: {
-          time: new Date(time),
+          time: {
+            $gte: new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate(), resultDate.getHours(), resultDate.getMinutes() - 5),
+            $lt: new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate(), resultDate.getHours(), resultDate.getMinutes() + 5),
+          },
           place,
         },
       },
@@ -42,59 +52,163 @@ export class ResultService extends BaseService<IResultDocument> {
         },
       },
     ];
-    const ticketWonPipeline = [
+    const ticketWonPipelineLeft = [
       {
         $match: {
-          time: new Date(time), // Assuming time is in milliseconds since epoch
+          time: {
+            $gte: new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate(), resultDate.getHours(), resultDate.getMinutes() - 5),
+            $lt: new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate(), resultDate.getHours(), resultDate.getMinutes() + 5),
+          },
           place,
-          ticket: result,
+          position: 'Left',
+          $or: [
+            { ticket: leftTicketNumber },
+            { ticket: Number(this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1]) },
+          ],
         },
       },
       {
         $group: {
           _id: null,
-          winnerCount: { $count: {} }, // Count of documents for this place today
-          totalDistributedAmount: { $sum: '$returns' }, // Total amount for this place today
+          winnerCountLeft: { $count: {} }, // Count of documents for this place today
+          totalDistributedAmountLeft: { $sum: '$returns' }, // Total amount for this place today
         },
       },
     ];
-    const purchaseDetails = await TicketService.repository.aggregate(ticketPurchasePipeline);
-    const winnerDetails = await TicketService.repository.aggregate(ticketWonPipeline);
 
+    const ticketWonPipelineRight = [
+      {
+        $match: {
+          time: {
+            $gte: new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate(), resultDate.getHours(), resultDate.getMinutes() - 5),
+            $lt: new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate(), resultDate.getHours(), resultDate.getMinutes() + 5),
+          },
+          place,
+          position: 'Right',
+          $or: [
+            { ticket: rightTicketNumber },
+            { ticket: Number(this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1]) },
+          ],
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          winnerCountRight: { $count: {} }, // Count of documents for this place today
+          totalDistributedAmountRight: { $sum: '$returns' }, // Total amount for this place today
+        },
+      },
+    ];
+
+    const ticketWonPipelineDouble = [
+      {
+        $match: {
+          time: {
+            $gte: new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate(), resultDate.getHours(), resultDate.getMinutes() - 5),
+            $lt: new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate(), resultDate.getHours(), resultDate.getMinutes() + 5),
+          },
+          place,
+          ticket: Number(
+            this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1] +
+              this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
+          ),
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          winnerCountDouble: { $count: {} }, // Count of documents for this place today
+          totalDistributedAmountDouble: { $sum: '$returns' }, // Total amount for this place today
+        },
+      },
+    ];
+
+    const purchaseDetails = await TicketService.repository.aggregate(ticketPurchasePipeline);
+    const winnerDetailsLeft = await TicketService.repository.aggregate(ticketWonPipelineLeft);
+    const winnerDetailsRight = await TicketService.repository.aggregate(ticketWonPipelineRight);
+    const winnerDetailsDouble = await TicketService.repository.aggregate(ticketWonPipelineDouble);
+
+    console.log('ok', purchaseDetails, winnerDetailsLeft, winnerDetailsRight, winnerDetailsDouble);
     await this.create({
       time,
       place,
-      result,
-      winnerCount: winnerDetails[0]?.winnerCount || 0,
-      totalDistributedAmount: winnerDetails[0]?.totalDistributedAmount || 0,
+      leftTicketNumber,
+      winnerCountLeft: winnerDetailsLeft[0]?.winnerCountLeft || 0,
+      totalDistributedAmountLeft: winnerDetailsLeft[0]?.totalDistributedAmountLeft || 0,
+      winnerCountRight: winnerDetailsRight[0]?.winnerCountRight || 0,
+      totalDistributedAmountRight: winnerDetailsRight[0]?.totalDistributedAmountRight || 0,
+      winnerCountDouble: winnerDetailsDouble[0]?.winnerCountDouble || 0,
+      totalDistributedAmountDouble: winnerDetailsDouble[0]?.totalDistributedAmountDouble || 0,
       ticketCount: purchaseDetails[0]?.ticketCount || 0,
       totalCollectedAmount: purchaseDetails[0]?.totalCollectedAmount || 0,
     });
-    const wonTickets = await TicketService.repository.find({ time: new Date(time), place, ticket: { $eq: result } });
-    console.log({ wonTickets });
 
-    await TicketService.repository.updateMany(
-      { time: new Date(time), place, ticket: { $eq: result } },
-      { $set: { won: true, result: result } },
-      { new: true },
+    await this.updateTicketWonAndUser(time, place, 'Left', leftTicketNumber);
+    await this.updateTicketWonAndUser(
+      time,
+      place,
+      'Left',
+      Number(this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1]),
     );
-
-    // Add User amount for winners
-    await Promise.all(
-      wonTickets.map(async ({ user, returns }) => {
-        return await UserService.updateOne({ _id: user }, { $inc: { amount: returns } });
-      }),
+    setTimeout(async () => this.repository.updateOne({ time, place }, { $set: { rightTicketNumber } }), 15 * 60 * 1000);
+    setTimeout(async () => await this.updateTicketWonAndUser(time, place, 'Right', rightTicketNumber), 15 * 60 * 1000);
+    setTimeout(
+      async () =>
+        await this.updateTicketWonAndUser(
+          time,
+          place,
+          'Right',
+          Number(this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1]),
+        ),
+      15 * 60 * 1000,
     );
-
+    setTimeout(
+      async () =>
+        await this.updateTicketWonAndUser(
+          time,
+          place,
+          null,
+          Number(
+            this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1] +
+              this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
+          ),
+        ),
+      15 * 60 * 1000,
+    );
     return {
       type: 'success',
       statusCode: 200,
       message: 'Ticket number released',
       time,
       place,
-      result,
     };
   }
+
+  updateTicketWonAndUser = async (time: number, place: string, position: 'Left' | 'Right' | null, ticketNumber: number) => {
+    const wonTickets = await TicketService.repository.find({ time: new Date(time), place, position, ticket: { $eq: ticketNumber } });
+    const resultDate = new Date(time);
+
+    await TicketService.repository.updateMany(
+      {
+        time: {
+          $gte: new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate(), resultDate.getHours(), resultDate.getMinutes() - 5),
+          $lt: new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate(), resultDate.getHours(), resultDate.getMinutes() + 5),
+        },
+        place,
+        position,
+        ticket: { $eq: ticketNumber },
+      },
+      { $set: { won: true, result: ticketNumber } },
+      { new: true },
+    );
+
+    // Add User amount for winners
+    return await Promise.all(
+      wonTickets.map(async ({ user, returns }) => {
+        return await UserService.updateOne({ _id: user }, { $inc: { amount: returns } });
+      }),
+    );
+  };
 }
 
 export default ResultService.getInstance();
