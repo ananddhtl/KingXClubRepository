@@ -4,7 +4,7 @@ export interface IAgent {
   country: string;
   address: string;
   name: string;
-  iddentity: Buffer;
+  iddentity: string;
   phone: string;
 }
 

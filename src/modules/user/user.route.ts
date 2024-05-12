@@ -9,17 +9,14 @@ import { adminOnly } from '@/middlewares/access.middleware';
 class UserRoute implements Routes {
   public path = `/${AppConfig.versioning}/user`;
   public router = Router();
-  public upload: multer;
+
   constructor() {
-    // Multer setup
-    const storage = multer.memoryStorage();
-    this.upload = multer({ storage: storage });
     this.initializeRoutes();
   }
 
   private initializeRoutes() {
     this.router.get(`${this.path}/me`, [authMiddleware], UserController.getLoggedinUserDetails);
-    this.router.post(`${this.path}/agent-form`, this.upload.single('file'), UserController.onboardAgent);
+    this.router.post(`${this.path}/submit/agent-form`, UserController.onboardAgent);
     this.router.delete(`${this.path}/me`, [authMiddleware], UserController.deleteLoggedinUserDetails);
     this.router.get(`${this.path}/all`, [authMiddleware, adminOnly()], UserController.findAll);
     this.router

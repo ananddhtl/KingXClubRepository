@@ -20,7 +20,7 @@ const AgentSchema: Schema<IAgentDocument> = new Schema({
     sparse: true,
   },
   iddentity: {
-    type: Buffer,
+    type: String,
     require: true,
   },
 });

@@ -34,12 +34,7 @@ export class UserController {
   // Route: GET: /v1/user/me
   public onboardAgent = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // if (!(req as any).file) throw new HttpException('FIle not found', httpStatus.CONFLICT);
-      console.log((req as any).file);
-
-      const iddentity = fs.readFileSync((req as any).file.path); // Read file data
-      const { name, country, address, phone } = req.body;
-      console.log(name, country, address, phone);
+      const { name, country, address, phone, iddentity } = req.body;
 
       await AgentModel.create({
         name,
@@ -49,12 +44,10 @@ export class UserController {
         iddentity,
       });
 
-      res.json({ message: 'File uploaded successfully!' });
+      res.json({ message: 'Agent onboard successfully!' });
     } catch (err) {
       console.error('Error in logging:', err);
       return next(err);
-    } finally {
-      fs.unlinkSync((req as any).file.path);
     }
   };
 
