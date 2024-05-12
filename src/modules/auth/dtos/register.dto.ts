@@ -1,5 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { ROLE } from '../../user/user.interface';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class RegisterDto {
   @IsString()
@@ -17,8 +16,7 @@ export class RegisterDto {
 
   @IsString()
   @IsOptional()
-  @IsEnum(ROLE)
-  role: ROLE;
+  referCode: string;
 
   @IsString()
   @IsOptional()

@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import { model, Schema } from 'mongoose';
 import { NextFunction } from 'express';
 
-import { IUserDocument } from './user.interface';
+import { IUserDocument, ROLE } from './user.interface';
 
 const UserSchema: Schema<IUserDocument> = new Schema({
   email: {
@@ -14,6 +14,14 @@ const UserSchema: Schema<IUserDocument> = new Schema({
   password: {
     type: String,
     required: true,
+  },
+  referCode: {
+    type: String,
+  },
+  role: {
+    type: String,
+    enum: Object.values(ROLE),
+    default: ROLE.USER,
   },
   name: {
     type: String,

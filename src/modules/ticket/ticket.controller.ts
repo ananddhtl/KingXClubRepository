@@ -172,8 +172,8 @@ export class TicketController {
   public findAllTicketPurchased = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = req.user as unknown as IUserDocument;
-      const response = await this.ticketService.find({ user: user._id });
-      return res.status(HttpStatus.OK).send(response);
+      const response = await this.ticketService.repository.find({ user: user._id }).sort({ createdAt: -1 });
+      return res.status(HttpStatus.OK).send({ data: response, message: 'Purchased ticket fetched' });
     } catch (error) {
       console.error('Error in logging:', error);
       return next(error);
