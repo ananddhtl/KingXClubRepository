@@ -12,7 +12,7 @@ const authMiddleware = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const token = req.cookies.jwt || req.headers.authorization.split(' ')[1];
+  const token = req.cookies?.jwt || req.headers.authorization?.split(' ')[1];
 
   if (token) {
     try {
@@ -25,7 +25,7 @@ const authMiddleware = async (
       next(new HttpException('Not authorized, token failed', httpStatus.UNAUTHORIZED));
     }
   } else {
-    next(new HttpException(MessagesMapping['#1'], httpStatus.BAD_REQUEST));
+    next(new HttpException(MessagesMapping['#2'], httpStatus.BAD_REQUEST));
   }
 };
 

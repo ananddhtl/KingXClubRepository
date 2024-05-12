@@ -1,10 +1,10 @@
-import { HttpStatus } from '@nestjs/common';
-import multer from 'multer';
+import { HttpException, HttpStatus } from '@nestjs/common';
 import UserService from './user.service';
 import { Request, Response, NextFunction } from 'express';
 import { IUserDocument } from './user.interface';
 import fs from 'fs';
 import AgentModel from './agent.modal';
+import httpStatus from 'http-status';
 
 export class UserController {
   static instance: null | UserController;
@@ -34,8 +34,12 @@ export class UserController {
   // Route: GET: /v1/user/me
   public onboardAgent = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // if (!(req as any).file) throw new HttpException('FIle not found', httpStatus.CONFLICT);
+      console.log((req as any).file);
+
       const iddentity = fs.readFileSync((req as any).file.path); // Read file data
       const { name, country, address, phone } = req.body;
+      console.log(name, country, address, phone);
 
       await AgentModel.create({
         name,

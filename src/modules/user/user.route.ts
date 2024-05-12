@@ -9,11 +9,11 @@ import { adminOnly } from '@/middlewares/access.middleware';
 class UserRoute implements Routes {
   public path = `/${AppConfig.versioning}/user`;
   public router = Router();
-  private upload = multer({
-    dest: 'uploads/', // Temporary directory for storing uploaded files
-  });
-
+  public upload: multer;
   constructor() {
+    // Multer setup
+    const storage = multer.memoryStorage();
+    this.upload = multer({ storage: storage });
     this.initializeRoutes();
   }
 
