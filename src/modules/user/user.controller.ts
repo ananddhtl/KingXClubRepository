@@ -1,7 +1,10 @@
 import { HttpStatus } from '@nestjs/common';
+import multer from 'multer';
 import UserService from './user.service';
 import { Request, Response, NextFunction } from 'express';
 import { IUserDocument } from './user.interface';
+import fs from 'fs';
+import AgentModel from './agent.modal';
 
 export class UserController {
   static instance: null | UserController;
@@ -25,6 +28,29 @@ export class UserController {
     } catch (error) {
       console.error('Error in logging:', error);
       return next(error);
+    }
+  };
+
+  // Route: GET: /v1/user/me
+  public onboardAgent = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const iddentity = fs.readFileSync((req as any).file.path); // Read file data
+      const { name, country, address, phone } = req.body;
+
+      await AgentModel.create({
+        name,
+        address,
+        country,
+        phone,
+        iddentity,
+      });
+
+      res.json({ message: 'File uploaded successfully!' });
+    } catch (err) {
+      console.error('Error in logging:', err);
+      return next(err);
+    } finally {
+      fs.unlinkSync((req as any).file.path);
     }
   };
 
