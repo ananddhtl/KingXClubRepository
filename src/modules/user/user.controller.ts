@@ -1,10 +1,8 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import UserService from './user.service';
 import { Request, Response, NextFunction } from 'express';
 import { IUserDocument } from './user.interface';
-import fs from 'fs';
 import AgentModel from './agent.modal';
-import httpStatus from 'http-status';
 
 export class UserController {
   static instance: null | UserController;
@@ -37,6 +35,7 @@ export class UserController {
       const { name, country, address, phone, iddentity } = req.body;
 
       await AgentModel.create({
+        referCode: `refer-${Date.now()}`,
         name,
         address,
         country,

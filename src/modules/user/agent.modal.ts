@@ -6,6 +6,10 @@ const AgentSchema: Schema<IAgentDocument> = new Schema({
     type: String,
     required: true,
   },
+  referCode: {
+    type: String,
+    required: true,
+  },
   country: {
     type: String,
     required: true,
