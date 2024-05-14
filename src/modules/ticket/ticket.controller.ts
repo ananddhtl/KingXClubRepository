@@ -3,6 +3,7 @@ import { HttpStatus } from '@nestjs/common';
 import TicketService from './ticket.service';
 import { BuyTicketDto } from './dtos/buy-ticket.dto';
 import { IUserDocument } from '../user/user.interface';
+import ActivityService from '../activity/activity.service';
 
 export class TicketController {
   static instance: null | TicketController;
@@ -39,6 +40,10 @@ export class TicketController {
       });
 
       const response = await this.ticketService.buyTicket(user._id, data, totalAmount);
+      await ActivityService.create({
+        user: user._id,
+        message: `You have brought ${tickets.length} tickets amounting Rs ${totalAmount} for ${place} city`,
+      });
       return res.status(HttpStatus.OK).send({ ...response, amount: totalAmount, message: 'Ticket purchased successfully' });
     } catch (error) {
       console.error('Error in logging:', error);

@@ -5,6 +5,7 @@ import { IResultDocument } from './result.interface';
 import TicketService from '../ticket/ticket.service';
 import httpStatus from 'http-status';
 import UserService from '../user/user.service';
+import ActivityService from '../activity/activity.service';
 
 export class ResultService extends BaseService<IResultDocument> {
   static instance: null | ResultService;
@@ -29,7 +30,6 @@ export class ResultService extends BaseService<IResultDocument> {
 
   async publishResult(time: number, place: string, leftTicketNumber: number, rightTicketNumber: number) {
     const hasAlreadyPublished = await this.repository.findOne({ time, place });
-    console.log(hasAlreadyPublished);
 
     if (hasAlreadyPublished) throw new HttpException('result already released', httpStatus.CONFLICT);
     const resultDate = new Date(time);
@@ -128,7 +128,6 @@ export class ResultService extends BaseService<IResultDocument> {
     const winnerDetailsRight = await TicketService.repository.aggregate(ticketWonPipelineRight);
     const winnerDetailsDouble = await TicketService.repository.aggregate(ticketWonPipelineDouble);
 
-    console.log('ok', purchaseDetails, winnerDetailsLeft, winnerDetailsRight, winnerDetailsDouble);
     await this.create({
       time,
       place,
@@ -205,6 +204,11 @@ export class ResultService extends BaseService<IResultDocument> {
     // Add User amount for winners
     return await Promise.all(
       wonTickets.map(async ({ user, returns }) => {
+        await ActivityService.create({
+          user: user,
+          message: `You have won Rs ${returns} from ticket number ${ticketNumber} at position ${position} 
+          on ${new Date(time).toLocaleString()} from ${place} city`,
+        });
         return await UserService.updateOne({ _id: user }, { $inc: { amount: returns } });
       }),
     );

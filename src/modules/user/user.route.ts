@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import multer from 'multer';
 import UserController from './user.controller';
 import { AppConfig } from '@/config';
 import { Routes } from '@/interfaces/routes.interface';
@@ -16,9 +15,10 @@ class UserRoute implements Routes {
 
   private initializeRoutes() {
     this.router.get(`${this.path}/me`, [authMiddleware], UserController.getLoggedinUserDetails);
-    this.router.post(`${this.path}/submit/agent-form`, UserController.onboardAgent);
+    this.router.post(`${this.path}/submit/agent-form`, [authMiddleware], UserController.onboardAgent);
     this.router.delete(`${this.path}/me`, [authMiddleware], UserController.deleteLoggedinUserDetails);
     this.router.get(`${this.path}/all`, [authMiddleware, adminOnly()], UserController.findAll);
+    this.router.post(`${this.path}/update-balance`, [authMiddleware, adminOnly()], UserController.updateBalance);
     this.router
       .route(`${this.path}/:userId`)
       .put([authMiddleware, adminOnly()], UserController.updateById)

@@ -24,7 +24,7 @@ class BetRoute implements Routes {
     this.router.get(`${this.path}/lucky-winners`, TicketController.getLuckyWinners);
     this.router
       .route(`${this.path}/:id`)
-      .get(TicketController.findById)
+      .get([authMiddleware, adminOnly()], TicketController.findById)
       .put([authMiddleware, adminOnly()], TicketController.updateById)
       .delete([authMiddleware, adminOnly()], TicketController.deleteById);
   }

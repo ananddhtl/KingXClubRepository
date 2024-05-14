@@ -243,8 +243,6 @@ export class AuthService {
   }
 
   public async logout(logoutDto: LogoutDto) {
-    console.log(logoutDto.refreshToken);
-
     const refreshToken = await this.tokenRepository.findOne({
       token: logoutDto.refreshToken,
       type: TokenTypes.REFRESH,

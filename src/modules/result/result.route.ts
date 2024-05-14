@@ -16,12 +16,16 @@ class ResultRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.post(`${this.path}/publish`, [validationMiddleware(PublishResultDto, 'body'), adminOnly()], ResultController.publishResult);
-    this.router.get(`${this.path}/all`, ResultController.findAll);
-    this.router.get(`${this.path}/get`, ResultController.getResult);
+    this.router.post(
+      `${this.path}/publish`,
+      [validationMiddleware(PublishResultDto, 'body'), authMiddleware, adminOnly()],
+      ResultController.publishResult,
+    );
+    this.router.get(`${this.path}/all`, authMiddleware, ResultController.findAll);
+    this.router.get(`${this.path}/get`, authMiddleware, ResultController.getResult);
     this.router
       .route(`${this.path}/:id`)
-      .get(ResultController.findById)
+      .get(authMiddleware, ResultController.findById)
       .put([authMiddleware, adminOnly()], ResultController.updateById)
       .delete([authMiddleware, adminOnly()], ResultController.deleteById);
   }

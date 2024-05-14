@@ -3,6 +3,7 @@ import UserService from './user.service';
 import { Request, Response, NextFunction } from 'express';
 import { IUserDocument } from './user.interface';
 import AgentModel from './agent.modal';
+import ActivityService from '../activity/activity.service';
 
 export class UserController {
   static instance: null | UserController;
@@ -42,7 +43,11 @@ export class UserController {
         phone,
         iddentity,
       });
-
+      const user = req.user as unknown as IUserDocument;
+      await ActivityService.create({
+        user: user._id,
+        message: 'You have applied for agent. Please wait till we review your application',
+      });
       res.json({ message: 'Agent onboard successfully!' });
     } catch (err) {
       console.error('Error in logging:', err);
@@ -79,6 +84,25 @@ export class UserController {
   public findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response = await this.userService.find({});
+      return res.status(HttpStatus.OK).send(response);
+    } catch (error) {
+      console.error('Error in logging:', error);
+      return next(error);
+    }
+  };
+  // Route: POST: /v1/user/update-balance
+  public updateBalance = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { balance, phone } = req.body;
+      const response = await this.userService.repository.findOneAndUpdate({ phone }, { $inc: { amount: balance } });
+      const user = await this.userService.findOne({ phone });
+      await ActivityService.create({
+        user: user._id,
+        message:
+          balance < 0
+            ? `You have successfully withdraw Rs ${balance} from your account`
+            : `You have successfully deposited Rs ${balance} from your account`,
+      });
       return res.status(HttpStatus.OK).send(response);
     } catch (error) {
       console.error('Error in logging:', error);
