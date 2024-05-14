@@ -34,7 +34,7 @@ export class TicketController {
           time: new Date(time),
           place,
           digit: ticket % 10,
-          returns: amount * (ticket % 10 === 3 ? 999 : ticket % 10 === 2 ? 499 : 99),
+          returns: amount * (ticket % 10 === 3 ? 499 : ticket % 10 === 2 ? 99 : 9),
           user: user._id,
         };
       });
