@@ -7,6 +7,9 @@ import httpStatus from 'http-status';
 import UserService from '../user/user.service';
 import ActivityService from '../activity/activity.service';
 
+const MIN_15_TIMEOUT = 15 * 60 * 1000;
+const HOUR_2_TIMEOUT = 2 * 60 * 60 * 1000;
+
 export class ResultService extends BaseService<IResultDocument> {
   static instance: null | ResultService;
 
@@ -143,14 +146,18 @@ export class ResultService extends BaseService<IResultDocument> {
     });
 
     await this.updateTicketWonAndUser(time, place, 'Left', leftTicketNumber);
-    await this.updateTicketWonAndUser(
-      time,
-      place,
-      'Left',
-      Number(this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1]),
+    setTimeout(
+      async () =>
+        await this.updateTicketWonAndUser(
+          time,
+          place,
+          'Left',
+          Number(this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1]),
+        ),
+      MIN_15_TIMEOUT,
     );
-    setTimeout(async () => this.repository.updateOne({ time, place }, { $set: { rightTicketNumber } }), 15 * 60 * 1000);
-    setTimeout(async () => await this.updateTicketWonAndUser(time, place, 'Right', rightTicketNumber), 15 * 60 * 1000);
+    setTimeout(async () => await this.repository.updateOne({ time, place }, { $set: { rightTicketNumber } }), HOUR_2_TIMEOUT);
+    setTimeout(async () => await this.updateTicketWonAndUser(time, place, 'Right', rightTicketNumber), HOUR_2_TIMEOUT);
     setTimeout(
       async () =>
         await this.updateTicketWonAndUser(
@@ -159,7 +166,7 @@ export class ResultService extends BaseService<IResultDocument> {
           'Right',
           Number(this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1]),
         ),
-      15 * 60 * 1000,
+      HOUR_2_TIMEOUT + MIN_15_TIMEOUT,
     );
     setTimeout(
       async () =>
@@ -172,7 +179,7 @@ export class ResultService extends BaseService<IResultDocument> {
               this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
           ),
         ),
-      15 * 60 * 1000,
+      HOUR_2_TIMEOUT + MIN_15_TIMEOUT,
     );
     return {
       type: 'success',
