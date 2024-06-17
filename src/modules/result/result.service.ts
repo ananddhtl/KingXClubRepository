@@ -207,6 +207,7 @@ export class ResultService extends BaseService<IResultDocument> {
       { $set: { won: true, result: ticketNumber } },
       { new: true },
     );
+    console.log('Result:', resultDate, wonTickets);
 
     // Add User amount for winners
     return await Promise.all(
