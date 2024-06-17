@@ -21,8 +21,8 @@ class ResultRoute implements Routes {
       [validationMiddleware(PublishResultDto, 'body'), authMiddleware, adminOnly()],
       ResultController.publishResult,
     );
-    this.router.get(`${this.path}/all`, authMiddleware, ResultController.findAll);
-    this.router.get(`${this.path}/get`, authMiddleware, ResultController.getResult);
+    this.router.get(`${this.path}/all`, ResultController.findAll);
+    this.router.get(`${this.path}/get`, ResultController.getResult);
     this.router
       .route(`${this.path}/:id`)
       .get(authMiddleware, ResultController.findById)
