@@ -4,6 +4,7 @@ import TicketService from './ticket.service';
 import { BuyTicketDto } from './dtos/buy-ticket.dto';
 import { IUserDocument } from '../user/user.interface';
 import ActivityService from '../activity/activity.service';
+import { findPana } from '@/utils/util';
 
 export class TicketController {
   static instance: null | TicketController;
@@ -27,6 +28,17 @@ export class TicketController {
 
       const data = tickets.map(({ ticket, amount, time, position }) => {
         totalAmount = totalAmount + amount;
+        const returnAmount =
+          ticket % 10 === 1
+            ? amount * 9
+            : ticket % 10 === 2
+            ? amount * 90
+            : findPana(ticket) === 1
+            ? amount * 150
+            : findPana(ticket) === 2
+            ? amount * 250
+            : amount * 490;
+
         return {
           ticket,
           amount,
@@ -34,7 +46,7 @@ export class TicketController {
           time: new Date(time),
           place,
           digit: ticket % 10,
-          returns: amount * (ticket % 10 === 3 ? 499 : ticket % 10 === 2 ? 99 : 9),
+          returns: returnAmount,
           user: user._id,
         };
       });
