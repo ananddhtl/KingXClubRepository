@@ -29,9 +29,11 @@ export class TicketController {
       const data = tickets.map(({ ticket, amount, time, position }) => {
         totalAmount = totalAmount + amount;
         const returnAmount =
-          ticket % 10 === 1
+          ticket === 777
+            ? 1000000
+            : String(ticket).length === 1
             ? amount * 9
-            : ticket % 10 === 2
+            : String(ticket).length === 2
             ? amount * 90
             : findPana(ticket) === 1
             ? amount * 150
