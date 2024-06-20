@@ -41,7 +41,7 @@ export class ResultController {
   // Route: GET: /v1/category/all
   public findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await this.resultService.find({});
+      const response = await this.resultService.repository.find({}).limit(50);
       return res.status(HttpStatus.OK).send(response);
     } catch (error) {
       console.error('Error in logging:', error);
