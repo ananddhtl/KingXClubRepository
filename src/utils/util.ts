@@ -30,13 +30,12 @@ export const isIncreasingNumber = (num: number) => {
   return true;
 };
 
-export const findPana = (num: number) => {
-  const numberString = num.toString();
+export const findPana = (value: string) => {
   // Create an object to store digit counts
   const digitCounts = {};
 
   // Iterate through each digit in the string
-  for (const digit of numberString) {
+  for (const digit of value) {
     // Check if the digit is already present in the object
     if (digitCounts[digit]) {
       digitCounts[digit]++; // Increment the count if found

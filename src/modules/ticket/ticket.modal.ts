@@ -3,7 +3,7 @@ import { model, Schema } from 'mongoose';
 
 const TicketSchema: Schema<ITicketDocument> = new Schema({
   ticket: {
-    type: Number,
+    type: String,
     required: true,
   },
   amount: {

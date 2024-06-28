@@ -1,4 +1,4 @@
-import { IsDate, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class PublishResultDto {
   @IsString()
@@ -7,11 +7,11 @@ export class PublishResultDto {
 
   @IsNumber()
   @IsNotEmpty()
-  leftTicketNumber: number;
+  leftTicketNumber: string;
 
   @IsNumber()
   @IsNotEmpty()
-  rightTicketNumber: number;
+  rightTicketNumber: string;
 
   @IsNumber()
   @IsNotEmpty()

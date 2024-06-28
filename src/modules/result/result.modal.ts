@@ -7,11 +7,11 @@ const ResultSchema: Schema<IResultDocument> = new Schema({
     required: true,
   },
   leftTicketNumber: {
-    type: Number,
+    type: String,
     required: true,
   },
   rightTicketNumber: {
-    type: Number,
+    type: String,
   },
   time: {
     type: Date,

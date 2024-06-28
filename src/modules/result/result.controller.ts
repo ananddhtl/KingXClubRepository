@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { HttpStatus } from '@nestjs/common';
 import ResultService from './result.service';
+import { PublishResultDto } from './dtos/publish-result.dto';
 
 export class ResultController {
   static instance: null | ResultController;
@@ -17,7 +18,7 @@ export class ResultController {
   // Route: POST: /v1/category/create
   public publishResult = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { time, place, leftTicketNumber, rightTicketNumber } = req.body;
+      const { time, place, leftTicketNumber, rightTicketNumber }: PublishResultDto = req.body;
       const response = await this.resultService.publishResult(time, place, leftTicketNumber, rightTicketNumber);
       return res.status(HttpStatus.OK).send(response);
     } catch (error) {

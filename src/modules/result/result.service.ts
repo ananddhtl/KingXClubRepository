@@ -25,13 +25,11 @@ export class ResultService extends BaseService<IResultDocument> {
     return this.instance;
   }
 
-  sumOfDigits(number) {
-    return String(number)
-      .split('')
-      .reduce((sum, digit) => sum + parseInt(digit), 0);
+  sumOfDigits(value: string) {
+    return value.split('').reduce((sum, digit) => sum + parseInt(digit), 0);
   }
 
-  async publishResult(time: number, place: string, leftTicketNumber: number, rightTicketNumber: number) {
+  async publishResult(time: number, place: string, leftTicketNumber: string, rightTicketNumber: string) {
     const hasAlreadyPublished = await this.repository.findOne({ time, place });
 
     if (hasAlreadyPublished) throw new HttpException('result already released', httpStatus.CONFLICT);
@@ -145,26 +143,26 @@ export class ResultService extends BaseService<IResultDocument> {
       totalCollectedAmount: purchaseDetails[0]?.totalCollectedAmount || 0,
     });
 
-    await this.updateTicketWonAndUser(time, place, 'Left', leftTicketNumber);
+    await this.updateTicketWonAndUser(time, place, 'Open', leftTicketNumber);
     setTimeout(
       async () =>
         await this.updateTicketWonAndUser(
           time,
           place,
-          'Left',
-          Number(this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1]),
+          'Open',
+          this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1],
         ),
       MIN_15_TIMEOUT,
     );
     setTimeout(async () => await this.repository.updateOne({ time, place }, { $set: { rightTicketNumber } }), HOUR_2_TIMEOUT);
-    setTimeout(async () => await this.updateTicketWonAndUser(time, place, 'Right', rightTicketNumber), HOUR_2_TIMEOUT);
+    setTimeout(async () => await this.updateTicketWonAndUser(time, place, 'Close', rightTicketNumber), HOUR_2_TIMEOUT);
     setTimeout(
       async () =>
         await this.updateTicketWonAndUser(
           time,
           place,
-          'Right',
-          Number(this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1]),
+          'Close',
+          this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
         ),
       HOUR_2_TIMEOUT + MIN_15_TIMEOUT,
     );
@@ -174,10 +172,8 @@ export class ResultService extends BaseService<IResultDocument> {
           time,
           place,
           null,
-          Number(
-            this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1] +
-              this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
-          ),
+          this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1] +
+            this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
         ),
       HOUR_2_TIMEOUT + MIN_15_TIMEOUT,
     );
@@ -190,8 +186,8 @@ export class ResultService extends BaseService<IResultDocument> {
     };
   }
 
-  updateTicketWonAndUser = async (time: number, place: string, position: 'Left' | 'Right' | null, ticketNumber: number) => {
-    const wonTickets = await TicketService.repository.find({ time: new Date(time), place, position, ticket: { $eq: ticketNumber } });
+  updateTicketWonAndUser = async (time: number, place: string, position: 'Open' | 'Close' | null, ticketNumber: string) => {
+    const wonTickets = await TicketService.repository.find({ time: new Date(time), place, position, ticket: { $eq: ticketNumber.toString() } });
     const resultDate = new Date(time);
 
     await TicketService.repository.updateMany(

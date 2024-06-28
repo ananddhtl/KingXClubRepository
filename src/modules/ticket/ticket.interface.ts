@@ -4,7 +4,7 @@ export interface ITicket {
   place: string;
   position: string;
   time: Date;
-  ticket: number;
+  ticket: string;
   digit: number;
   amount: number;
   returns: number;

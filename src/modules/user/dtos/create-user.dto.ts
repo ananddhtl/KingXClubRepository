@@ -2,9 +2,9 @@ import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'cl
 import { ROLE } from '../user.interface';
 
 export class CreateUserDto {
-  @IsString()
-  @IsEmail()
   @IsNotEmpty()
+  @IsEmail()
+  @IsString()
   email: string;
 
   @IsString()

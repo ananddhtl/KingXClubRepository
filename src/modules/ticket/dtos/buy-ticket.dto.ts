@@ -8,7 +8,7 @@ export class BuyTicketDto {
   @IsArray()
   @IsNotEmpty()
   tickets: {
-    ticket: number;
+    ticket: string;
     amount: number;
     time: number;
     position?: string;
