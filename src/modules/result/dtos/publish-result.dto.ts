@@ -5,11 +5,11 @@ export class PublishResultDto {
   @IsNotEmpty()
   place: string;
 
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
   leftTicketNumber: string;
 
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
   rightTicketNumber: string;
 
