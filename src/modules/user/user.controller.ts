@@ -103,7 +103,9 @@ export class UserController {
             ? `You have successfully withdraw Rs ${balance} from your account`
             : `You have successfully deposited Rs ${balance} from your account`,
       });
-      return res.status(HttpStatus.OK).send(response);
+      return res.status(HttpStatus.OK).send({
+        message: balance < 0 ? `Withdraw of Rs ${balance} Success` : `Deposit of Rs ${balance} Success`,
+      });
     } catch (error) {
       console.error('Error in logging:', error);
       return next(error);
