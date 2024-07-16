@@ -8,7 +8,7 @@ import UserService from '../user/user.service';
 import ActivityService from '../activity/activity.service';
 
 const MIN_15_TIMEOUT = 15 * 60 * 1000;
-const HOUR_2_TIMEOUT = 2 * 60 * 60 * 1000;
+const HOUR_1_TIMEOUT = 60 * 60 * 1000;
 
 export class ResultService extends BaseService<IResultDocument> {
   static instance: null | ResultService;
@@ -154,8 +154,8 @@ export class ResultService extends BaseService<IResultDocument> {
         ),
       MIN_15_TIMEOUT,
     );
-    setTimeout(async () => await this.repository.updateOne({ time, place }, { $set: { rightTicketNumber } }), HOUR_2_TIMEOUT);
-    setTimeout(async () => await this.updateTicketWonAndUser(time, place, 'Close', rightTicketNumber), HOUR_2_TIMEOUT);
+    setTimeout(async () => await this.repository.updateOne({ time, place }, { $set: { rightTicketNumber } }), HOUR_1_TIMEOUT);
+    setTimeout(async () => await this.updateTicketWonAndUser(time, place, 'Close', rightTicketNumber), HOUR_1_TIMEOUT);
     setTimeout(
       async () =>
         await this.updateTicketWonAndUser(
@@ -164,7 +164,7 @@ export class ResultService extends BaseService<IResultDocument> {
           'Close',
           this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
         ),
-      HOUR_2_TIMEOUT + MIN_15_TIMEOUT,
+      HOUR_1_TIMEOUT + MIN_15_TIMEOUT,
     );
     setTimeout(
       async () =>
@@ -175,7 +175,7 @@ export class ResultService extends BaseService<IResultDocument> {
           this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1] +
             this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
         ),
-      HOUR_2_TIMEOUT + MIN_15_TIMEOUT,
+      HOUR_1_TIMEOUT + MIN_15_TIMEOUT,
     );
     return {
       type: 'success',
