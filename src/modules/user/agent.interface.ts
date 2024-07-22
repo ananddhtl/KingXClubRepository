@@ -1,4 +1,4 @@
-import { Document } from 'mongoose';
+import { Document, ObjectId } from 'mongoose';
 
 export interface IAgent {
   country: string;
@@ -7,6 +7,7 @@ export interface IAgent {
   name: string;
   iddentity: string;
   phone: string;
+  users: ObjectId[];
 }
 
 export interface IAgentDocument extends IAgent, Document {}

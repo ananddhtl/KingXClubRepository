@@ -27,6 +27,12 @@ const AgentSchema: Schema<IAgentDocument> = new Schema({
     type: String,
     require: true,
   },
+  users: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'user',
+    },
+  ],
 });
 
 const AgentModel = model('agent', AgentSchema);

@@ -8,7 +8,6 @@ const ResultSchema: Schema<IResultDocument> = new Schema({
   },
   leftTicketNumber: {
     type: String,
-    required: true,
   },
   rightTicketNumber: {
     type: String,
@@ -19,35 +18,27 @@ const ResultSchema: Schema<IResultDocument> = new Schema({
   },
   winnerCountLeft: {
     type: Number,
-    required: true,
   },
   totalDistributedAmountLeft: {
     type: Number,
-    required: true,
   },
   winnerCountRight: {
     type: Number,
-    required: true,
   },
   totalDistributedAmountRight: {
     type: Number,
-    required: true,
   },
   winnerCountDouble: {
     type: Number,
-    required: true,
   },
   totalDistributedAmountDouble: {
     type: Number,
-    required: true,
   },
   totalCollectedAmount: {
     type: Number,
-    required: true,
   },
   ticketCount: {
     type: Number,
-    required: true,
   },
   createdAt: { type: Date, default: Date.now },
 });

@@ -1,4 +1,4 @@
-import { Document } from 'mongoose';
+import { Document, ObjectId } from 'mongoose';
 
 export enum ROLE {
   ADMIN = 'admin',
@@ -7,10 +7,10 @@ export enum ROLE {
 }
 export interface IUser {
   email: string;
-  referCode: string;
   role: ROLE;
   name: string;
   password: string;
+  agent: ObjectId;
   phone: string;
   amount: number;
 }

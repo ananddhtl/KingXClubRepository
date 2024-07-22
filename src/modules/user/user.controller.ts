@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import UserService from './user.service';
 import { Request, Response, NextFunction } from 'express';
-import { IUserDocument } from './user.interface';
+import { IUserDocument, ROLE } from './user.interface';
 import AgentModel from './agent.modal';
 import ActivityService from '../activity/activity.service';
 
@@ -36,7 +36,7 @@ export class UserController {
       const { name, country, address, phone, iddentity } = req.body;
 
       await AgentModel.create({
-        referCode: `refer-${Date.now()}`,
+        referCode: parseInt(phone, 36),
         name,
         address,
         country,
@@ -84,6 +84,17 @@ export class UserController {
   public findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response = await this.userService.find({});
+      return res.status(HttpStatus.OK).send(response);
+    } catch (error) {
+      console.error('Error in logging:', error);
+      return next(error);
+    }
+  };
+
+  //agent detail
+  public findAllAgentDetail = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await this.userService.find({ role: ROLE.AGENT });
       return res.status(HttpStatus.OK).send(response);
     } catch (error) {
       console.error('Error in logging:', error);

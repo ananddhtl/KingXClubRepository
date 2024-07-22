@@ -29,8 +29,8 @@ export class ResultService extends BaseService<IResultDocument> {
     return value.split('').reduce((sum, digit) => sum + parseInt(digit), 0);
   }
 
-  async publishResult(time: number, place: string, leftTicketNumber: string, rightTicketNumber: string) {
-    const hasAlreadyPublished = await this.repository.findOne({ time, place });
+  async publishLeftResult(time: number, place: string, leftTicketNumber: string) {
+    const hasAlreadyPublished = await this.repository.findOne({ time, place, leftTicketNumber: { $exists: true } });
 
     if (hasAlreadyPublished) throw new HttpException('result already released', httpStatus.CONFLICT);
     const resultDate = new Date(time);
@@ -61,10 +61,10 @@ export class ResultService extends BaseService<IResultDocument> {
             $lt: new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate(), resultDate.getHours(), resultDate.getMinutes() + 5),
           },
           place,
-          position: 'Left',
+          position: 'Open',
           $or: [
             { ticket: leftTicketNumber },
-            { ticket: Number(this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1]) },
+            { ticket: Number(this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1]).toString() },
           ],
         },
       },
@@ -77,6 +77,47 @@ export class ResultService extends BaseService<IResultDocument> {
       },
     ];
 
+    const purchaseDetails = await TicketService.repository.aggregate(ticketPurchasePipeline);
+    const winnerDetailsLeft = await TicketService.repository.aggregate(ticketWonPipelineLeft);
+    console.log({ winnerDetailsLeft });
+
+    await this.create({
+      time,
+      place,
+      leftTicketNumber,
+      winnerCountLeft: winnerDetailsLeft[0]?.winnerCountLeft || 0,
+      totalDistributedAmountLeft: winnerDetailsLeft[0]?.totalDistributedAmountLeft || 0,
+      ticketCount: purchaseDetails[0]?.ticketCount || 0,
+      totalCollectedAmount: purchaseDetails[0]?.totalCollectedAmount || 0,
+    });
+
+    await this.updateTicketWonAndUser(time, place, 'Open', leftTicketNumber);
+    setTimeout(
+      async () =>
+        await this.updateTicketWonAndUser(
+          time,
+          place,
+          'Open',
+          this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1],
+        ),
+      MIN_15_TIMEOUT,
+    );
+    return {
+      type: 'success',
+      statusCode: 200,
+      message: 'Open Positon Number released',
+      time,
+      place,
+    };
+  }
+
+  async publishRightResult(time: number, place: string, rightTicketNumber: string) {
+    const hasAlreadyPublished = await this.repository.findOne({ time, place });
+
+    if (hasAlreadyPublished && hasAlreadyPublished?.rightTicketNumber)
+      throw new HttpException('close position result already released', httpStatus.CONFLICT);
+    const resultDate = new Date(time);
+
     const ticketWonPipelineRight = [
       {
         $match: {
@@ -85,10 +126,10 @@ export class ResultService extends BaseService<IResultDocument> {
             $lt: new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate(), resultDate.getHours(), resultDate.getMinutes() + 5),
           },
           place,
-          position: 'Right',
+          position: 'Close',
           $or: [
             { ticket: rightTicketNumber },
-            { ticket: Number(this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1]) },
+            { ticket: Number(this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1]).toString() },
           ],
         },
       },
@@ -110,9 +151,10 @@ export class ResultService extends BaseService<IResultDocument> {
           },
           place,
           ticket: Number(
-            this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1] +
-              this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
-          ),
+            this.sumOfDigits(hasAlreadyPublished?.leftTicketNumber).toString()[
+              this.sumOfDigits(hasAlreadyPublished?.leftTicketNumber).toString().length - 1
+            ] + this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
+          ).toString(),
         },
       },
       {
@@ -124,38 +166,27 @@ export class ResultService extends BaseService<IResultDocument> {
       },
     ];
 
-    const purchaseDetails = await TicketService.repository.aggregate(ticketPurchasePipeline);
-    const winnerDetailsLeft = await TicketService.repository.aggregate(ticketWonPipelineLeft);
     const winnerDetailsRight = await TicketService.repository.aggregate(ticketWonPipelineRight);
     const winnerDetailsDouble = await TicketService.repository.aggregate(ticketWonPipelineDouble);
 
-    await this.create({
-      time,
-      place,
-      leftTicketNumber,
-      winnerCountLeft: winnerDetailsLeft[0]?.winnerCountLeft || 0,
-      totalDistributedAmountLeft: winnerDetailsLeft[0]?.totalDistributedAmountLeft || 0,
-      winnerCountRight: winnerDetailsRight[0]?.winnerCountRight || 0,
-      totalDistributedAmountRight: winnerDetailsRight[0]?.totalDistributedAmountRight || 0,
-      winnerCountDouble: winnerDetailsDouble[0]?.winnerCountDouble || 0,
-      totalDistributedAmountDouble: winnerDetailsDouble[0]?.totalDistributedAmountDouble || 0,
-      ticketCount: purchaseDetails[0]?.ticketCount || 0,
-      totalCollectedAmount: purchaseDetails[0]?.totalCollectedAmount || 0,
-    });
-
-    await this.updateTicketWonAndUser(time, place, 'Open', leftTicketNumber);
-    setTimeout(
-      async () =>
-        await this.updateTicketWonAndUser(
-          time,
-          place,
-          'Open',
-          this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1],
-        ),
-      MIN_15_TIMEOUT,
+    await this.repository.updateMany(
+      {
+        time,
+        place,
+      },
+      {
+        $set: {
+          winnerCountRight: winnerDetailsRight[0]?.winnerCountRight || 0,
+          totalDistributedAmountRight: winnerDetailsRight[0]?.totalDistributedAmountRight || 0,
+          winnerCountDouble: winnerDetailsDouble[0]?.winnerCountDouble || 0,
+          totalDistributedAmountDouble: winnerDetailsDouble[0]?.totalDistributedAmountDouble || 0,
+        },
+      },
+      { new: true },
     );
-    setTimeout(async () => await this.repository.updateOne({ time, place }, { $set: { rightTicketNumber } }), HOUR_1_TIMEOUT);
-    setTimeout(async () => await this.updateTicketWonAndUser(time, place, 'Close', rightTicketNumber), HOUR_1_TIMEOUT);
+
+    await this.repository.updateOne({ time, place }, { $set: { rightTicketNumber } });
+    await this.updateTicketWonAndUser(time, place, 'Close', rightTicketNumber);
     setTimeout(
       async () =>
         await this.updateTicketWonAndUser(
@@ -164,7 +195,7 @@ export class ResultService extends BaseService<IResultDocument> {
           'Close',
           this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
         ),
-      HOUR_1_TIMEOUT + MIN_15_TIMEOUT,
+      MIN_15_TIMEOUT,
     );
     setTimeout(
       async () =>
@@ -172,15 +203,16 @@ export class ResultService extends BaseService<IResultDocument> {
           time,
           place,
           null,
-          this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1] +
-            this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
+          this.sumOfDigits(hasAlreadyPublished?.leftTicketNumber).toString()[
+            this.sumOfDigits(hasAlreadyPublished?.leftTicketNumber).toString().length - 1
+          ] + this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
         ),
-      HOUR_1_TIMEOUT + MIN_15_TIMEOUT,
+      MIN_15_TIMEOUT,
     );
     return {
       type: 'success',
       statusCode: 200,
-      message: 'Ticket number released',
+      message: 'Close Positon Number released',
       time,
       place,
     };

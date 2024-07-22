@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 import ResultService from './result.service';
 import { PublishResultDto } from './dtos/publish-result.dto';
+import httpStatus from 'http-status';
 
 export class ResultController {
   static instance: null | ResultController;
@@ -18,8 +19,16 @@ export class ResultController {
   // Route: POST: /v1/category/create
   public publishResult = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { time, place, leftTicketNumber, rightTicketNumber }: PublishResultDto = req.body;
-      const response = await this.resultService.publishResult(time, place, leftTicketNumber, rightTicketNumber);
+      const { time, place, ticketNumber, position }: PublishResultDto = req.body;
+      const response =
+        position === 'Open'
+          ? await this.resultService.publishLeftResult(time, place, ticketNumber)
+          : position === 'Close'
+          ? await this.resultService.publishRightResult(time, place, ticketNumber)
+          : () => {
+              throw new HttpException('error releasing ticket number', httpStatus.CONFLICT);
+            };
+
       return res.status(HttpStatus.OK).send(response);
     } catch (error) {
       console.error('Error in logging:', error);

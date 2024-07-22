@@ -11,6 +11,8 @@ import AuthService from './auth.service';
 import { NextFunction, Request, Response } from 'express';
 import ActivityService from '../activity/activity.service';
 import { IUserDocument } from '../user/user.interface';
+import AgentModel from '../user/agent.modal';
+import UserModel from '../user/user.modal';
 
 export class AuthController {
   static instance: null | AuthController;
@@ -46,6 +48,18 @@ export class AuthController {
     try {
       const registerUserDto: RegisterDto = req.body;
       const response = await this.authService.register(registerUserDto);
+
+      //add user to agent if he register from agent refer code
+      if (registerUserDto?.referCode) {
+        const agent = await AgentModel.findOneAndUpdate(
+          { referCode: registerUserDto?.referCode },
+          {
+            $push: { users: response.user._id },
+          },
+        );
+
+        UserModel.updateOne({ _id: response.user._id }, { $set: { agent: agent._id } });
+      }
       await ActivityService.create({
         user: response.user._id,
         message: response.message,

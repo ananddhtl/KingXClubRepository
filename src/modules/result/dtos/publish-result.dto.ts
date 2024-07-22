@@ -7,11 +7,11 @@ export class PublishResultDto {
 
   @IsString()
   @IsNotEmpty()
-  leftTicketNumber: string;
+  position: string;
 
   @IsString()
   @IsNotEmpty()
-  rightTicketNumber: string;
+  ticketNumber: string;
 
   @IsNumber()
   @IsNotEmpty()
