@@ -3,7 +3,7 @@ import UserController from './user.controller';
 import { AppConfig } from '@/config';
 import { Routes } from '@/interfaces/routes.interface';
 import authMiddleware from '@/middlewares/auth.middleware';
-import { adminOnly } from '@/middlewares/access.middleware';
+import { masterOnly, AgentOrAgentOnly, userOnly } from '@/middlewares/access.middleware';
 
 class UserRoute implements Routes {
   public path = `/${AppConfig.versioning}/user`;
@@ -15,16 +15,17 @@ class UserRoute implements Routes {
 
   private initializeRoutes() {
     this.router.get(`${this.path}/me`, [authMiddleware], UserController.getLoggedinUserDetails);
-    this.router.post(`${this.path}/submit/agent-form`, [authMiddleware], UserController.onboardAgent);
+    this.router.post(`${this.path}/submit/agent-form`, [authMiddleware, userOnly()], UserController.onboardAgent);
     this.router.delete(`${this.path}/me`, [authMiddleware], UserController.deleteLoggedinUserDetails);
-    this.router.get(`${this.path}/all`, [authMiddleware, adminOnly()], UserController.findAll);
-    this.router.get(`${this.path}/agent/getAll`, [authMiddleware, adminOnly()], UserController.findAllAgentDetail);
-    this.router.post(`${this.path}/update-balance`, [authMiddleware, adminOnly()], UserController.updateBalance);
+    this.router.get(`${this.path}/all`, [authMiddleware, masterOnly()], UserController.findAll);
+    this.router.get(`${this.path}/agent/getAll`, [authMiddleware, AgentOrAgentOnly()], UserController.findAllAgentDetail);
+    this.router.get(`${this.path}/agent/getUser`, [authMiddleware, AgentOrAgentOnly()], UserController.findAllAgentUserDetail);
+    this.router.post(`${this.path}/update-balance`, [authMiddleware, AgentOrAgentOnly(true)], UserController.updateBalance);
     this.router
       .route(`${this.path}/:userId`)
-      .put([authMiddleware, adminOnly()], UserController.updateById)
-      .get([authMiddleware, adminOnly()], UserController.findById)
-      .delete([authMiddleware, adminOnly()], UserController.deleteById);
+      .put([authMiddleware, masterOnly()], UserController.updateById)
+      .get([authMiddleware, masterOnly()], UserController.findById)
+      .delete([authMiddleware, masterOnly()], UserController.deleteById);
   }
 }
 

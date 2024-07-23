@@ -1,10 +1,12 @@
 import { Document, ObjectId } from 'mongoose';
 
 export enum ROLE {
+  MASTER = 'master',
   ADMIN = 'admin',
   AGENT = 'agent',
   USER = 'user',
 }
+
 export interface IUser {
   email: string;
   role: ROLE;

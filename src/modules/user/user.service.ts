@@ -31,6 +31,11 @@ export class UserService extends BaseService<IUserDocument> {
     return user;
   }
 
+  async getAgentUserDetails(userId: string): Promise<IUserDocument[]> {
+    const users = await this.repository.find({ agent: userId });
+    return users;
+  }
+
   async deleteLoggedinUserDetails(userId: string): Promise<any> {
     const user = await this.repository.deleteOne({ _id: userId });
 

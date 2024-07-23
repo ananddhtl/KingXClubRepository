@@ -10,7 +10,6 @@ import { TokenDto } from './dtos/token.dto';
 import AuthService from './auth.service';
 import { NextFunction, Request, Response } from 'express';
 import ActivityService from '../activity/activity.service';
-import { IUserDocument } from '../user/user.interface';
 import AgentModel from '../user/agent.modal';
 import UserModel from '../user/user.modal';
 
@@ -32,10 +31,6 @@ export class AuthController {
     try {
       const loginDto: LoginDto = req.body;
       const response = await this.authService.login(loginDto);
-      await ActivityService.create({
-        user: response.user._id,
-        message: response.message,
-      });
       return res.status(HttpStatus.OK).send(response);
     } catch (error) {
       console.error('Error in logging:', error);
@@ -58,7 +53,8 @@ export class AuthController {
           },
         );
 
-        UserModel.updateOne({ _id: response.user._id }, { $set: { agent: agent._id } });
+        const data = await UserModel.findOneAndUpdate({ _id: response?.user?._id }, { $set: { agent: agent?._id } });
+        console.log({ data });
       }
       await ActivityService.create({
         user: response.user._id,
@@ -75,13 +71,7 @@ export class AuthController {
   public logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const logoutDto: LogoutDto = req.body;
-      const user = req.user as unknown as IUserDocument;
-
       const response = await this.authService.logout(logoutDto);
-      await ActivityService.create({
-        user: user._id,
-        message: response.message,
-      });
       return res.status(HttpStatus.OK).send(response);
     } catch (error) {
       console.error('Error in logging:', error);

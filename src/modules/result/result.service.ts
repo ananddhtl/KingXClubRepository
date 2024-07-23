@@ -8,7 +8,7 @@ import UserService from '../user/user.service';
 import ActivityService from '../activity/activity.service';
 
 const MIN_15_TIMEOUT = 15 * 60 * 1000;
-const HOUR_1_TIMEOUT = 60 * 60 * 1000;
+// const HOUR_1_TIMEOUT = 60 * 60 * 1000;
 
 export class ResultService extends BaseService<IResultDocument> {
   static instance: null | ResultService;
@@ -242,6 +242,7 @@ export class ResultService extends BaseService<IResultDocument> {
       wonTickets.map(async ({ user, returns }) => {
         await ActivityService.create({
           user: user,
+          balanceChange: returns,
           message: `You have won Rs ${returns} from ticket number ${ticketNumber} at position ${position} 
           on ${new Date(time).toLocaleString()} from ${place} city`,
         });

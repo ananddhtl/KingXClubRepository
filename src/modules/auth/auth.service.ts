@@ -80,7 +80,7 @@ export class AuthService {
   }
 
   private async generateAuthTokens(user: IUserDocument) {
-    const accessTokenExpires = moment().add(this.configService.accessToken.expirationTime, 'minutes');
+    const accessTokenExpires = moment().add(this.configService.accessToken.expirationTime, 'hours');
     const accessTokenSecret = this.configService.accessToken.secretKey;
 
     const accessToken = this.generateToken(user, accessTokenExpires, TokenTypes.ACCESS, accessTokenSecret);

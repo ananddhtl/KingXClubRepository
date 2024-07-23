@@ -4,11 +4,37 @@ import { HttpException } from '@nestjs/common';
 import { RequestHandler } from 'express';
 import httpStatus from 'http-status';
 
-export const adminOnly = (): RequestHandler => {
+export const masterOnly = (): RequestHandler => {
   return (req, res, next) => {
-    console.log((req.user as unknown as IUser).role);
+    if ((req.user as unknown as IUser).role === ROLE.MASTER) {
+      next();
+    } else {
+      next(new HttpException(MessagesMapping['#24'], httpStatus.FORBIDDEN));
+    }
+  };
+};
 
-    if ((req.user as unknown as IUser).role === ROLE.ADMIN) {
+// export const adminOnly = (): RequestHandler => {
+//   return (req, res, next) => {
+//     if ((req.user as unknown as IUser).role === ROLE.ADMIN) {
+//       next();
+//     } else {
+//       next(new HttpException(MessagesMapping['#24'], httpStatus.FORBIDDEN));
+//     }
+//   };
+// };
+
+export const AgentOrAgentOnly = (hasMasterControl = false): RequestHandler => {
+  return (req, res, next) => {
+    if ((req.user as unknown as IUser).role === ROLE.MASTER && hasMasterControl) next();
+    else if ((req.user as unknown as IUser).role === ROLE.AGENT) next();
+    else next(new HttpException(MessagesMapping['#24'], httpStatus.FORBIDDEN));
+  };
+};
+
+export const userOnly = (): RequestHandler => {
+  return (req, res, next) => {
+    if ((req.user as unknown as IUser).role === ROLE.USER) {
       next();
     } else {
       next(new HttpException(MessagesMapping['#24'], httpStatus.FORBIDDEN));

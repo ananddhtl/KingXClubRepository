@@ -94,25 +94,54 @@ export class UserController {
   //agent detail
   public findAllAgentDetail = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await this.userService.find({ role: ROLE.AGENT });
+      const agents = await this.userService.repository.find({ role: ROLE.AGENT });
+      const users = await Promise.all(
+        agents.map(async agent => {
+          return await this.userService.getAgentUserDetails(agent._id);
+        }),
+      );
+      return res.status(HttpStatus.OK).send({ agents, users });
+    } catch (error) {
+      console.error('Error in logging:', error);
+      return next(error);
+    }
+  };
+
+  //agent user detail
+  public findAllAgentUserDetail = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const agent = req.user as unknown as IUserDocument;
+      const response = await this.userService.getAgentUserDetails(agent._id);
       return res.status(HttpStatus.OK).send(response);
     } catch (error) {
       console.error('Error in logging:', error);
       return next(error);
     }
   };
+
   // Route: POST: /v1/user/update-balance
   public updateBalance = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { balance, phone } = req.body;
-      const response = await this.userService.repository.findOneAndUpdate({ phone }, { $inc: { amount: balance } });
+      const agentOrMaster = req.user as unknown as IUserDocument;
+      await this.userService.repository.findOneAndUpdate({ phone, agent: agentOrMaster?._id }, { $inc: { amount: balance } });
+      await this.userService.repository.findOneAndUpdate({ _id: agentOrMaster?._id }, { $inc: { amount: -balance } });
       const user = await this.userService.findOne({ phone });
       await ActivityService.create({
         user: user._id,
+        balanceChange: balance,
         message:
-          balance < 0
-            ? `You have successfully withdraw Rs ${balance} from your account`
-            : `You have successfully deposited Rs ${balance} from your account`,
+          balance > 0
+            ? `You have successfully deposited Rs ${balance} to your account`
+            : `You have successfully withdraw Rs ${balance} from your account`,
+      });
+      await ActivityService.create({
+        user: agentOrMaster._id,
+        balanceChange: -balance,
+        message:
+          -balance > 0
+            ? `You have successfully deposited Rs ${balance} from user ${user._id}, your balance should increase, you pay out to user in cash.`
+            : `You have successfully withdrawed Rs ${balance} from your account to user ${user._id}, your balance should decrease, you receive cash from user.`,
       });
       return res.status(HttpStatus.OK).send({
         message: balance < 0 ? `Withdraw of Rs ${balance} Success` : `Deposit of Rs ${balance} Success`,

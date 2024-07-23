@@ -32,7 +32,7 @@ const UserSchema: Schema<IUserDocument> = new Schema({
     unique: true,
     sparse: true,
   },
-  amount: { type: Number, default: 0 },
+  amount: { type: Number, default: 0, min: 0 },
 });
 
 UserSchema.pre<IUserDocument>('save', function (next: NextFunction) {

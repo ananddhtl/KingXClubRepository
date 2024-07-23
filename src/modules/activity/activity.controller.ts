@@ -16,12 +16,37 @@ export class ActivityController {
     return this.instance;
   }
 
-  // Route: GET: /v1/category/all
+  // Route: GET: /v1/activity/all
   public findMyActivity = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = req.user as unknown as IUserDocument;
       const response = await this.activityService.repository.find({ user: user._id }).sort({ createdAt: -1 }).limit(100);
-      return res.status(HttpStatus.OK).send({ data: response, message: 'User Activities' });
+      const transactionPipeline = [
+        {
+          $match: {
+            balanceChange: {
+              $gt: 0,
+            },
+            user: user._id,
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            transactionCount: { $count: {} },
+            totalBalanceAmount: { $sum: '$balanceChange' },
+          },
+        },
+      ];
+      const purchaseDetails = await this.activityService.repository.aggregate(transactionPipeline);
+      return res.status(HttpStatus.OK).send({
+        data: {
+          history: response,
+          transactionCount: purchaseDetails[0]?.transactionCount || 0,
+          transactionAmount: purchaseDetails[0]?.totalBalanceAmount || 0,
+        },
+        message: 'User Activities',
+      });
     } catch (error) {
       console.error('Error in logging:', error);
       return next(error);
@@ -43,8 +68,33 @@ export class ActivityController {
   public findById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const response = await this.activityService.findById(id);
-      return res.status(HttpStatus.OK).send(response);
+      const response = await this.activityService.repository.find({ user: id }).sort({ createdAt: -1 }).limit(100);
+      const transactionPipeline = [
+        {
+          $match: {
+            balanceChange: {
+              $gt: 0,
+            },
+            user: id,
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            transactionCount: { $count: {} },
+            totalBalanceAmount: { $sum: '$balanceChange' },
+          },
+        },
+      ];
+      const purchaseDetails = await this.activityService.repository.aggregate(transactionPipeline);
+      return res.status(HttpStatus.OK).send({
+        data: {
+          history: response,
+          transactionCount: purchaseDetails[0]?.transactionCount || 0,
+          transactionAmount: purchaseDetails[0]?.totalBalanceAmount || 0,
+        },
+        message: 'User Activities',
+      });
     } catch (error) {
       console.error('Error in logging:', error);
       return next(error);

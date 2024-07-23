@@ -3,8 +3,8 @@ import { HttpStatus } from '@nestjs/common';
 import TicketService from './ticket.service';
 import { BuyTicketDto } from './dtos/buy-ticket.dto';
 import { IUserDocument } from '../user/user.interface';
-import ActivityService from '../activity/activity.service';
 import { findPana } from '@/utils/util';
+import { UserService } from '../user/user.service';
 
 export class TicketController {
   static instance: null | TicketController;
@@ -54,10 +54,6 @@ export class TicketController {
       });
 
       const response = await this.ticketService.buyTicket(user._id, data, totalAmount);
-      await ActivityService.create({
-        user: user._id,
-        message: `You have brought ${tickets.length} tickets amounting Rs ${totalAmount} for ${place} city`,
-      });
       return res.status(HttpStatus.OK).send({ ...response, amount: totalAmount, message: 'Ticket purchased successfully' });
     } catch (error) {
       console.error('Error in logging:', error);
@@ -113,6 +109,59 @@ export class TicketController {
             $lt: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
           },
         },
+      },
+      {
+        $group: {
+          _id: {
+            ticket: '$ticket',
+            place: '$place',
+            position: '$position',
+          }, // Group by place field
+          count: { $count: {} }, // Count of documents for this place today
+          totalAmount: { $sum: '$amount' }, // Total amount for this place today
+          returnAmount: { $sum: '$returns' }, // Total amount for this place today
+          time: { $first: '$time' },
+        },
+      },
+    ];
+
+    const response = await this.ticketService.repository.aggregate(pipeline);
+    const numAggregateResponse = await this.ticketService.repository.aggregate(numberPipeline);
+
+    return res.status(HttpStatus.OK).send({ data: response, summary: numAggregateResponse });
+  };
+
+  public getTodayPurchasedTicketForAgent = async (req: Request, res: Response, next: NextFunction) => {
+    const agent = req.user as unknown as IUserDocument;
+    const users = await UserService.getInstance().getAgentUserDetails(agent._id);
+    const userFilter = users.map(user => ({ user: user._id }));
+    const today = new Date();
+
+    const query =
+      userFilter.length > 0
+        ? {
+            time: {
+              $gte: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
+              $lt: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
+            },
+            $or: userFilter,
+          }
+        : {
+            time: {
+              $gte: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
+              $lt: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
+            },
+          };
+
+    const pipeline = [
+      {
+        $match: query,
+      },
+    ];
+
+    const numberPipeline = [
+      {
+        $match: query,
       },
       {
         $group: {
