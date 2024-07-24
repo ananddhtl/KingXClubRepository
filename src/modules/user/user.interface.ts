@@ -13,8 +13,13 @@ export interface IUser {
   name: string;
   password: string;
   agent: ObjectId;
+  referCode: string;
   phone: string;
   amount: number;
+  country: string;
+  address: string;
+  iddentity: string;
+  users: ObjectId[];
 }
 
 export interface IUserDocument extends IUser, Document {}

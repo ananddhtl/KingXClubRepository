@@ -16,7 +16,7 @@ export class RegisterDto {
 
   @IsString()
   @IsOptional()
-  referCode: string;
+  usedReferCode: string;
 
   @IsString()
   @IsOptional()

@@ -43,12 +43,15 @@ export class AuthService {
     });
   }
 
-  private async userExistance(email: string): Promise<void> {
+  private async userExistance(data: RegisterDto): Promise<void> {
     const user = await this.userRepository.findOne({
-      email,
+      email: data.email,
+    });
+    const userWithSameNumber = await this.userRepository.findOne({
+      phone: data.phone,
     });
 
-    if (user) {
+    if (user || userWithSameNumber) {
       throw new HttpException(MessagesMapping['#1'], HttpStatus.BAD_REQUEST);
     }
   }
@@ -265,9 +268,9 @@ export class AuthService {
   }
 
   public async register(registrationData: RegisterDto) {
-    await this.userExistance(registrationData.email);
+    await this.userExistance(registrationData);
 
-    const createdUser = await this.userRepository.create(registrationData);
+    const createdUser = await this.userRepository.create({ ...registrationData, referCode: parseInt(registrationData.phone, 36) });
 
     createdUser.password = undefined;
 

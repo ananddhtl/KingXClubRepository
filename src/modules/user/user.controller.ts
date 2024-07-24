@@ -1,9 +1,9 @@
-import { HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 import UserService from './user.service';
 import { Request, Response, NextFunction } from 'express';
 import { IUserDocument, ROLE } from './user.interface';
-import AgentModel from './agent.modal';
 import ActivityService from '../activity/activity.service';
+import httpStatus from 'http-status';
 
 export class UserController {
   static instance: null | UserController;
@@ -33,17 +33,18 @@ export class UserController {
   // Route: GET: /v1/user/me
   public onboardAgent = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { name, country, address, phone, iddentity } = req.body;
-
-      await AgentModel.create({
-        referCode: parseInt(phone, 36),
-        name,
-        address,
-        country,
-        phone,
-        iddentity,
-      });
+      const { name, country, address, iddentity } = req.body;
       const user = req.user as unknown as IUserDocument;
+
+      await this.userService.repository.updateOne(
+        { _id: user._id },
+        {
+          name,
+          address,
+          country,
+          iddentity,
+        },
+      );
       await ActivityService.create({
         user: user._id,
         message: 'You have applied for agent. Please wait till we review your application',
@@ -124,7 +125,8 @@ export class UserController {
     try {
       const { balance, phone } = req.body;
       const agentOrMaster = req.user as unknown as IUserDocument;
-      await this.userService.repository.findOneAndUpdate({ phone, agent: agentOrMaster?._id }, { $inc: { amount: balance } });
+      const response = await this.userService.repository.findOneAndUpdate({ phone, agent: agentOrMaster?._id }, { $inc: { amount: balance } });
+      if (!response) throw new HttpException('you are not the agent to this customer', httpStatus.FORBIDDEN);
       await this.userService.repository.findOneAndUpdate({ _id: agentOrMaster?._id }, { $inc: { amount: -balance } });
       const user = await this.userService.findOne({ phone });
       await ActivityService.create({

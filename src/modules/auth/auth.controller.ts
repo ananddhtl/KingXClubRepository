@@ -10,8 +10,9 @@ import { TokenDto } from './dtos/token.dto';
 import AuthService from './auth.service';
 import { NextFunction, Request, Response } from 'express';
 import ActivityService from '../activity/activity.service';
-import AgentModel from '../user/agent.modal';
 import UserModel from '../user/user.modal';
+import UserService from '../user/user.service';
+import { ROLE } from '../user/user.interface';
 
 export class AuthController {
   static instance: null | AuthController;
@@ -45,17 +46,24 @@ export class AuthController {
       const response = await this.authService.register(registerUserDto);
 
       //add user to agent if he register from agent refer code
-      if (registerUserDto?.referCode) {
-        const agent = await AgentModel.findOneAndUpdate(
-          { referCode: registerUserDto?.referCode },
+      let agent;
+      if (registerUserDto?.usedReferCode) {
+        agent = await UserService.repository.findOneAndUpdate(
+          { referCode: registerUserDto?.usedReferCode },
           {
             $push: { users: response.user._id },
           },
         );
-
-        const data = await UserModel.findOneAndUpdate({ _id: response?.user?._id }, { $set: { agent: agent?._id } });
-        console.log({ data });
+      } else {
+        agent = await UserService.repository.findOneAndUpdate(
+          { role: ROLE.MASTER },
+          {
+            $push: { users: response.user._id },
+          },
+        );
       }
+      const data = await UserModel.findOneAndUpdate({ _id: response?.user?._id }, { $set: { agent: agent?._id } });
+      console.log({ data });
       await ActivityService.create({
         user: response.user._id,
         message: response.message,

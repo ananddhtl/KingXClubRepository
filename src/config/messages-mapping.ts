@@ -1,5 +1,5 @@
 export const MessagesMapping = {
-  '#1': 'User already exists',
+  '#1': 'User already exists, use different email or number',
   '#2': 'Token not found',
   '#3': 'Your credentials are not valid',
   '#4': 'Account already verified',

@@ -20,6 +20,10 @@ const UserSchema: Schema<IUserDocument> = new Schema({
     enum: Object.values(ROLE),
     default: ROLE.USER,
   },
+  referCode: {
+    type: String,
+    required: true,
+  },
   name: {
     type: String,
   },
@@ -27,6 +31,21 @@ const UserSchema: Schema<IUserDocument> = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'user',
   },
+  country: {
+    type: String,
+  },
+  address: {
+    type: String,
+  },
+  iddentity: {
+    type: String,
+  },
+  users: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'user',
+    },
+  ],
   phone: {
     type: String,
     unique: true,

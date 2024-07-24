@@ -33,6 +33,8 @@ export class UserService extends BaseService<IUserDocument> {
 
   async getAgentUserDetails(userId: string): Promise<IUserDocument[]> {
     const users = await this.repository.find({ agent: userId });
+    console.log({ users });
+
     return users;
   }
 

@@ -18,7 +18,7 @@ class UserRoute implements Routes {
     this.router.post(`${this.path}/submit/agent-form`, [authMiddleware, userOnly()], UserController.onboardAgent);
     this.router.delete(`${this.path}/me`, [authMiddleware], UserController.deleteLoggedinUserDetails);
     this.router.get(`${this.path}/all`, [authMiddleware, masterOnly()], UserController.findAll);
-    this.router.get(`${this.path}/agent/getAll`, [authMiddleware, AgentOrAgentOnly()], UserController.findAllAgentDetail);
+    this.router.get(`${this.path}/agent/getAll`, [authMiddleware, masterOnly()], UserController.findAllAgentDetail);
     this.router.get(`${this.path}/agent/getUser`, [authMiddleware, AgentOrAgentOnly()], UserController.findAllAgentUserDetail);
     this.router.post(`${this.path}/update-balance`, [authMiddleware, AgentOrAgentOnly(true)], UserController.updateBalance);
     this.router
