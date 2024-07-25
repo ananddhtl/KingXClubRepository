@@ -62,7 +62,13 @@ class App {
       },
     };
     this.app.use(morgan(AppConfig.log_format, { stream }));
-    this.app.use(cors({ origin: AppConfig.origin, credentials: AppConfig.credential }));
+    this.app.use(
+      cors({
+        origin: AppConfig.origin, // or use an array for multiple origins
+        methods: 'GET,POST,PUT,DELETE', // specify allowed methods if needed
+        allowedHeaders: 'Content-Type,Authorization', // specify allowed headers if needed
+      }),
+    );
     this.app.use(hpp());
     this.app.use(helmet());
     this.app.use(compression());
