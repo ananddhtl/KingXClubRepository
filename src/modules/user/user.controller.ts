@@ -84,24 +84,8 @@ export class UserController {
   // Route: GET: /v1/user/all
   public findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await this.userService.find({});
+      const response = await this.userService.repository.find({}).populate('agent');
       return res.status(HttpStatus.OK).send(response);
-    } catch (error) {
-      console.error('Error in logging:', error);
-      return next(error);
-    }
-  };
-
-  //agent detail
-  public findAllAgentDetail = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const agents = await this.userService.repository.find({ role: ROLE.AGENT });
-      const users = await Promise.all(
-        agents.map(async agent => {
-          return await this.userService.getAgentUserDetails(agent._id);
-        }),
-      );
-      return res.status(HttpStatus.OK).send({ agents, users });
     } catch (error) {
       console.error('Error in logging:', error);
       return next(error);

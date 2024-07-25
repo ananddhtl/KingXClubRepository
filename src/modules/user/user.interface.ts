@@ -20,6 +20,7 @@ export interface IUser {
   address: string;
   iddentity: string;
   users: ObjectId[];
+  createdAt?: Date;
 }
 
 export interface IUserDocument extends IUser, Document {}

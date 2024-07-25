@@ -52,6 +52,7 @@ const UserSchema: Schema<IUserDocument> = new Schema({
     sparse: true,
   },
   amount: { type: Number, default: 0, min: 0 },
+  createdAt: { type: Date, default: Date.now },
 });
 
 UserSchema.pre<IUserDocument>('save', function (next: NextFunction) {
