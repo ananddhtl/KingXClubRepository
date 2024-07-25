@@ -9,7 +9,6 @@ import { LogoutDto } from './dtos/logout.dto';
 import { RegisterDto } from './dtos/register.dto';
 import { ResetPasswordDto } from './dtos/reset-password.dto';
 import { TokenDto } from './dtos/token.dto';
-import passport from 'passport';
 import authMiddleware from '@/middlewares/auth.middleware';
 
 class AuthRoute implements Routes {
@@ -24,9 +23,9 @@ class AuthRoute implements Routes {
     this.router.post(`${this.path}/login`, [validationMiddleware(LoginDto, 'body')], AuthController.login);
     this.router.post(`${this.path}/register`, [validationMiddleware(RegisterDto, 'body')], AuthController.register);
     this.router.post(`${this.path}/logout`, [validationMiddleware(LogoutDto, 'body'), authMiddleware], AuthController.logout);
-    this.router.post(`${this.path}/generate/token`, [validationMiddleware(TokenDto, 'body'), authMiddleware], AuthController.generateTokens);
-    this.router.post(`${this.path}/forgot-password`, [validationMiddleware(ForgotPasswordDto, 'body')], AuthController.forgotPassword);
-    this.router.post(`${this.path}/reset-password`, [validationMiddleware(ResetPasswordDto, 'body')], AuthController.resetPassword);
+    // this.router.post(`${this.path}/generate/token`, [validationMiddleware(TokenDto, 'body'), authMiddleware], AuthController.generateTokens);
+    // this.router.post(`${this.path}/forgot-password`, [validationMiddleware(ForgotPasswordDto, 'body')], AuthController.forgotPassword);
+    // this.router.post(`${this.path}/reset-password`, [validationMiddleware(ResetPasswordDto, 'body')], AuthController.resetPassword);
   }
 }
 

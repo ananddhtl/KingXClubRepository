@@ -54,6 +54,14 @@ export class AuthController {
             $push: { users: response.user._id },
           },
         );
+        if (!agent) {
+          agent = await UserService.repository.findOneAndUpdate(
+            { role: ROLE.MASTER },
+            {
+              $push: { users: response.user._id },
+            },
+          );
+        }
       } else {
         agent = await UserService.repository.findOneAndUpdate(
           { role: ROLE.MASTER },
@@ -87,42 +95,42 @@ export class AuthController {
     }
   };
 
-  // Route: GET: /v1/auth/generate/tokens
-  public generateTokens = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const tokenDto: TokenDto = req.body;
-      const response = await this.authService.generateTokens(tokenDto);
-      return res.status(HttpStatus.OK).send(response);
-    } catch (error) {
-      console.error('Error in logging:', error);
-      return next(error);
-    }
-  };
+  // // Route: GET: /v1/auth/generate/tokens
+  // public generateTokens = async (req: Request, res: Response, next: NextFunction) => {
+  //   try {
+  //     const tokenDto: TokenDto = req.body;
+  //     const response = await this.authService.generateTokens(tokenDto);
+  //     return res.status(HttpStatus.OK).send(response);
+  //   } catch (error) {
+  //     console.error('Error in logging:', error);
+  //     return next(error);
+  //   }
+  // };
 
-  // Route: GET: /v1/auth/forgot-password
-  public forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const forgotPasswordDto: ForgotPasswordDto = req.body;
-      const response = await this.authService.forgotPassword(forgotPasswordDto);
-      return res.status(HttpStatus.OK).send(response);
-    } catch (error) {
-      console.error('Error in logging:', error);
-      return next(error);
-    }
-  };
+  // // Route: GET: /v1/auth/forgot-password
+  // public forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+  //   try {
+  //     const forgotPasswordDto: ForgotPasswordDto = req.body;
+  //     const response = await this.authService.forgotPassword(forgotPasswordDto);
+  //     return res.status(HttpStatus.OK).send(response);
+  //   } catch (error) {
+  //     console.error('Error in logging:', error);
+  //     return next(error);
+  //   }
+  // };
 
-  // Route: GET: /v1/auth/reset-password
-  public resetPassword = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const resetPasswordDto: ResetPasswordDto = req.body;
-      const { token } = req.query;
-      const response = await this.authService.resetPassword(resetPasswordDto, token as string);
-      return res.status(HttpStatus.OK).send(response);
-    } catch (error) {
-      console.error('Error in logging:', error);
-      return next(error);
-    }
-  };
+  // // Route: GET: /v1/auth/reset-password
+  // public resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+  //   try {
+  //     const resetPasswordDto: ResetPasswordDto = req.body;
+  //     const { token } = req.query;
+  //     const response = await this.authService.resetPassword(resetPasswordDto, token as string);
+  //     return res.status(HttpStatus.OK).send(response);
+  //   } catch (error) {
+  //     console.error('Error in logging:', error);
+  //     return next(error);
+  //   }
+  // };
 }
 
 export default AuthController.getInstance();

@@ -7,7 +7,7 @@ import httpStatus from 'http-status';
 import UserService from '../user/user.service';
 import ActivityService from '../activity/activity.service';
 
-const MIN_15_TIMEOUT = 15 * 60 * 1000;
+// const MIN_15_TIMEOUT = 15 * 60 * 1000;
 // const HOUR_1_TIMEOUT = 60 * 60 * 1000;
 
 export class ResultService extends BaseService<IResultDocument> {
@@ -92,15 +92,11 @@ export class ResultService extends BaseService<IResultDocument> {
     });
 
     await this.updateTicketWonAndUser(time, place, 'Open', leftTicketNumber);
-    setTimeout(
-      async () =>
-        await this.updateTicketWonAndUser(
-          time,
-          place,
-          'Open',
-          this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1],
-        ),
-      MIN_15_TIMEOUT,
+    await this.updateTicketWonAndUser(
+      time,
+      place,
+      'Open',
+      this.sumOfDigits(leftTicketNumber).toString()[this.sumOfDigits(leftTicketNumber).toString().length - 1],
     );
     return {
       type: 'success',
@@ -187,27 +183,19 @@ export class ResultService extends BaseService<IResultDocument> {
 
     await this.repository.updateOne({ time, place }, { $set: { rightTicketNumber } });
     await this.updateTicketWonAndUser(time, place, 'Close', rightTicketNumber);
-    setTimeout(
-      async () =>
-        await this.updateTicketWonAndUser(
-          time,
-          place,
-          'Close',
-          this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
-        ),
-      MIN_15_TIMEOUT,
+    await this.updateTicketWonAndUser(
+      time,
+      place,
+      'Close',
+      this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
     );
-    setTimeout(
-      async () =>
-        await this.updateTicketWonAndUser(
-          time,
-          place,
-          null,
-          this.sumOfDigits(hasAlreadyPublished?.leftTicketNumber).toString()[
-            this.sumOfDigits(hasAlreadyPublished?.leftTicketNumber).toString().length - 1
-          ] + this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
-        ),
-      MIN_15_TIMEOUT,
+    await this.updateTicketWonAndUser(
+      time,
+      place,
+      null,
+      this.sumOfDigits(hasAlreadyPublished?.leftTicketNumber).toString()[
+        this.sumOfDigits(hasAlreadyPublished?.leftTicketNumber).toString().length - 1
+      ] + this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
     );
     return {
       type: 'success',

@@ -109,7 +109,8 @@ export class UserController {
     try {
       const { balance, phone } = req.body;
       const agentOrMaster = req.user as unknown as IUserDocument;
-      const response = await this.userService.repository.findOneAndUpdate({ phone, agent: agentOrMaster?._id }, { $inc: { amount: balance } });
+      const query = agentOrMaster.role === ROLE.MASTER ? { phone } : { phone, agent: agentOrMaster?._id };
+      const response = await this.userService.repository.findOneAndUpdate(query, { $inc: { amount: balance } });
       if (!response) throw new HttpException('you are not the agent to this customer', httpStatus.FORBIDDEN);
       await this.userService.repository.findOneAndUpdate({ _id: agentOrMaster?._id }, { $inc: { amount: -balance } });
       const user = await this.userService.findOne({ phone });

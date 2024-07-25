@@ -57,11 +57,16 @@ export class AuthService {
   }
 
   private generateToken(user: IUserDocument, expires: moment.Moment, type: TokenTypes, secret: string): string {
-    const userData = JSON.parse(JSON.stringify(user));
+    const userData = JSON.parse(JSON.stringify(user)) as IUserDocument;
     const payload = {
       sub: {
-        ...userData,
-        password: undefined,
+        _id: userData._id,
+        role: userData.role,
+        referCode: userData.referCode,
+        email: userData.email,
+        phone: userData.phone,
+        name: userData?.name,
+        agent: userData?.agent,
       },
       iat: moment().unix(),
       exp: expires.unix(),

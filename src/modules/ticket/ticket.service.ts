@@ -26,10 +26,14 @@ export class TicketService extends BaseService<ITicketDocument> {
     //Deduct User amount
     const user = await UserService.findOne({ _id: userId });
     if (user.amount < totalAmount) throw new HttpException('Balance not available to buy ticket', httpStatus.FORBIDDEN);
+
+    const result = await this.repository.create(buyticket);
+    //deduct user balance
     await UserService.updateOne({ _id: userId }, { $inc: { amount: -totalAmount } });
     //Add balance to master account
     const master = await UserService.repository.findOneAndUpdate({ role: ROLE.MASTER }, { $inc: { amount: totalAmount } });
 
+    //add data in history
     await ActivityService.create({
       user: userId,
       balanceChange: -totalAmount,
@@ -40,8 +44,6 @@ export class TicketService extends BaseService<ITicketDocument> {
       balanceChange: totalAmount,
       message: `${userId} have brought ${buyticket.length} tickets amounting Rs ${totalAmount}.`,
     });
-
-    const result = await this.repository.create(buyticket);
     return result;
   }
 }
