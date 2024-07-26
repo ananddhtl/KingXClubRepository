@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { HttpStatus } from '@nestjs/common';
 import ActivityService from './activity.service';
 import { IUserDocument } from '../user/user.interface';
+import { Types } from 'mongoose';
 
 export class ActivityController {
   static instance: null | ActivityController;
@@ -24,21 +25,21 @@ export class ActivityController {
       const transactionPipeline = [
         {
           $match: {
-            balanceChange: {
-              $gt: 0,
-            },
-            user: user._id,
+            balanceChange: { $ne: 0 },
+            user: new Types.ObjectId(user._id), // Ensure this is a valid ObjectId
           },
         },
         {
           $group: {
-            _id: null,
-            transactionCount: { $count: {} },
-            totalBalanceAmount: { $sum: '$balanceChange' },
+            _id: null, // Grouping all documents together
+            transactionCount: { $sum: 1 }, // Count transactions
+            totalBalanceAmount: { $sum: '$balanceChange' }, // Sum balanceChange
           },
         },
       ];
+
       const purchaseDetails = await this.activityService.repository.aggregate(transactionPipeline);
+
       return res.status(HttpStatus.OK).send({
         data: {
           history: response,
@@ -72,20 +73,19 @@ export class ActivityController {
       const transactionPipeline = [
         {
           $match: {
-            balanceChange: {
-              $gt: 0,
-            },
-            user: id,
+            balanceChange: { $ne: 0 },
+            user: new Types.ObjectId(id), // Ensure this is a valid ObjectId
           },
         },
         {
           $group: {
-            _id: null,
-            transactionCount: { $count: {} },
-            totalBalanceAmount: { $sum: '$balanceChange' },
+            _id: null, // Grouping all documents together
+            transactionCount: { $sum: 1 }, // Count transactions
+            totalBalanceAmount: { $sum: '$balanceChange' }, // Sum balanceChange
           },
         },
       ];
+
       const purchaseDetails = await this.activityService.repository.aggregate(transactionPipeline);
       return res.status(HttpStatus.OK).send({
         data: {
