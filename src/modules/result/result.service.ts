@@ -6,6 +6,7 @@ import TicketService from '../ticket/ticket.service';
 import httpStatus from 'http-status';
 import UserService from '../user/user.service';
 import ActivityService from '../activity/activity.service';
+import { ROLE } from '../user/user.interface';
 
 // const MIN_15_TIMEOUT = 15 * 60 * 1000;
 // const HOUR_1_TIMEOUT = 60 * 60 * 1000;
@@ -223,20 +224,27 @@ export class ResultService extends BaseService<IResultDocument> {
       { $set: { won: true, result: ticketNumber } },
       { new: true },
     );
-    console.log('Result:', resultDate, wonTickets);
 
     // Add User amount for winners
-    return await Promise.all(
-      wonTickets.map(async ({ user, returns }) => {
-        await ActivityService.create({
-          user: user,
-          balanceChange: returns,
-          message: `You have won Rs ${returns} from ticket number ${ticketNumber} at position ${position} 
-          on ${new Date(time).toLocaleString()} from ${place} city`,
-        });
-        return await UserService.updateOne({ _id: user }, { $inc: { amount: returns } });
-      }),
-    );
+    let totalReturns = 0;
+    const distributeRewardPromise = wonTickets.map(async ({ user, returns }) => {
+      totalReturns += returns;
+      await ActivityService.create({
+        user: user,
+        balanceChange: returns,
+        message: `You have won Rs ${returns} from ticket number ${ticketNumber} at position ${position} 
+        on ${new Date(time).toLocaleString()} from ${place} city`,
+      });
+      return await UserService.updateOne({ _id: user }, { $inc: { amount: returns } });
+    });
+    const master = await UserService.repository.findOneAndUpdate({ role: ROLE.MASTER }, { $inc: { amount: -totalReturns } });
+    await ActivityService.create({
+      user: master._id,
+      balanceChange: -totalReturns,
+      message: `Distribute amount: ${totalReturns} for ticket: ${ticketNumber} at position ${position} 
+      on ${new Date(time).toLocaleString()} for club ${place}`,
+    });
+    return await Promise.all(distributeRewardPromise);
   };
 }
 
