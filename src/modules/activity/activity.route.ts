@@ -16,6 +16,7 @@ class ActivityRoute implements Routes {
   private initializeRoutes() {
     this.router.get(`${this.path}/all`, [authMiddleware, masterOnly()], ActivityController.findAll);
     this.router.get(`${this.path}/me`, authMiddleware, ActivityController.findMyActivity);
+    this.router.get(`${this.path}/me`, authMiddleware, ActivityController.findMyActivity);
     this.router
       .route(`${this.path}/:id`)
       .get([authMiddleware, masterOnly()], ActivityController.findById)

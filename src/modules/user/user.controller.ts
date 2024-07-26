@@ -56,6 +56,25 @@ export class UserController {
     }
   };
 
+  public makeAgent = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { phone, role, ...rest } = req.body;
+      const user = req.user as unknown as IUserDocument;
+
+      const query = user.role === ROLE.MASTER ? { phone } : { phone, agent: user?._id };
+      const response = await this.userService.updateOne(query, { rest, role });
+      if (!response) throw new HttpException('you are not the agent to this customer', httpStatus.FORBIDDEN);
+      await ActivityService.create({
+        user: user._id,
+        message: `You have made this number ${phone} as ${role}`,
+      });
+      res.json({ message: 'Agent onboard successfully!' });
+    } catch (err) {
+      console.error('Error in logging:', err);
+      return next(err);
+    }
+  };
+
   // Route: DELETE: /v1/user/me
   public deleteLoggedinUserDetails = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -84,7 +103,7 @@ export class UserController {
   // Route: GET: /v1/user/all
   public findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await this.userService.repository.find({}).populate('agent');
+      const response = await this.userService.repository.find({}).populate('agent').select('-password');
       return res.status(HttpStatus.OK).send(response);
     } catch (error) {
       console.error('Error in logging:', error);

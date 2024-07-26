@@ -22,7 +22,7 @@ const TicketSchema: Schema<ITicketDocument> = new Schema({
     type: String,
   },
   won: { type: Boolean, default: false },
-  user: { type: Schema.Types.ObjectId, required: true },
+  user: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true, required: true },
   time: { type: Date, required: true },
   createdAt: { type: Date, default: Date.now },
 });

@@ -20,6 +20,7 @@ export class ResultController {
   public publishResult = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { time, place, ticketNumber, position }: PublishResultDto = req.body;
+      if (ticketNumber.length !== 3) throw new HttpException('Number must be 3 digit', httpStatus.CONFLICT);
       const response =
         position === 'Open'
           ? await this.resultService.publishLeftResult(time, place, ticketNumber)
