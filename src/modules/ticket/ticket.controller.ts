@@ -99,40 +99,6 @@ export class TicketController {
           },
         },
       },
-      {
-        $lookup: {
-          from: 'users', // Replace "users" with your actual user table name
-          localField: 'ticket.user', // Assuming "ticket.user_id" is the user ID in your documents
-          foreignField: 'user',
-          as: 'user',
-        },
-      },
-      {
-        $unwind: '$user', // If you expect only one user per document
-      },
-      {
-        $project: {
-          ticket: 1,
-          amount: 1,
-          returns: 1,
-          place: 1,
-          position: 1,
-          won: 1,
-          user: {
-            _id: 1,
-            email: 1,
-            phone: 1,
-            name: 1,
-            role: 1,
-            createdAt: 1,
-            agent: 1,
-            amount: 1,
-          }, // Include the entire user object
-          createdAt: 1,
-          time: 1,
-          // Add or remove fields as needed
-        },
-      },
     ];
 
     const numberPipeline = [

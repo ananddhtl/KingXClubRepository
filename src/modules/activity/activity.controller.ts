@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { HttpStatus } from '@nestjs/common';
 import ActivityService from './activity.service';
-import { IUserDocument } from '../user/user.interface';
+import { IUserDocument, ROLE } from '../user/user.interface';
 import { Types } from 'mongoose';
 
 export class ActivityController {
@@ -22,29 +22,35 @@ export class ActivityController {
     try {
       const user = req.user as unknown as IUserDocument;
       const response = await this.activityService.repository.find({ user: user._id }).sort({ createdAt: -1 }).limit(100);
-      const transactionPipeline = [
-        {
-          $match: {
-            balanceChange: { $ne: 0 },
-            user: new Types.ObjectId(user._id), // Ensure this is a valid ObjectId
+      let transactionCount = 0;
+      let transactionAmount = 0;
+      if (user.role !== ROLE.USER) {
+        const transactionPipeline = [
+          {
+            $match: {
+              balanceChange: { $ne: 0 },
+              user: new Types.ObjectId(user._id), // Ensure this is a valid ObjectId
+            },
           },
-        },
-        {
-          $group: {
-            _id: null, // Grouping all documents together
-            transactionCount: { $sum: 1 }, // Count transactions
-            totalBalanceAmount: { $sum: '$balanceChange' }, // Sum balanceChange
+          {
+            $group: {
+              _id: null, // Grouping all documents together
+              transactionCount: { $sum: 1 }, // Count transactions
+              totalBalanceAmount: { $sum: '$balanceChange' }, // Sum balanceChange
+            },
           },
-        },
-      ];
+        ];
 
-      const purchaseDetails = await this.activityService.repository.aggregate(transactionPipeline);
+        const purchaseDetails = await this.activityService.repository.aggregate(transactionPipeline);
+        transactionCount = purchaseDetails[0]?.transactionCount;
+        transactionAmount = purchaseDetails[0]?.totalBalanceAmount;
+      }
 
       return res.status(HttpStatus.OK).send({
         data: {
           history: response,
-          transactionCount: purchaseDetails[0]?.transactionCount || 0,
-          transactionAmount: purchaseDetails[0]?.totalBalanceAmount || 0,
+          transactionCount,
+          transactionAmount,
         },
         message: 'User Activities',
       });
