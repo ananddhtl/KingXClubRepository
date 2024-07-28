@@ -34,6 +34,18 @@ const ResultSchema: Schema<IResultDocument> = new Schema({
   totalDistributedAmountDouble: {
     type: Number,
   },
+  winnerCountHalfKing: {
+    type: Number,
+  },
+  totalDistributedAmountHalfKing: {
+    type: Number,
+  },
+  winnerCountFullKing: {
+    type: Number,
+  },
+  totalDistributedAmountFullKing: {
+    type: Number,
+  },
   totalCollectedAmount: {
     type: Number,
   },

@@ -11,6 +11,10 @@ export interface IResult {
   totalDistributedAmountRight: number;
   winnerCountDouble: number;
   totalDistributedAmountDouble: number;
+  winnerCountHalfKing: number;
+  totalDistributedAmountHalfKing: number;
+  winnerCountFullKing: number;
+  totalDistributedAmountFullKing: number;
   totalCollectedAmount: number;
   ticketCount: number;
   createdAt?: Date;

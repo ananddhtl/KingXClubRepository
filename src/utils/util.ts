@@ -31,6 +31,7 @@ export const isIncreasingNumber = (num: number) => {
 };
 
 export const findPana = (value: string) => {
+  if (value.split('-').length !== 1) return 0;
   // Create an object to store digit counts
   const digitCounts = {};
 
@@ -44,4 +45,11 @@ export const findPana = (value: string) => {
     }
   }
   return Math.max(...(Object.values(digitCounts) as number[]));
+};
+
+export const findKing = (value: string) => {
+  const numbers = value.split('-');
+  if (numbers.length !== 2) return 0;
+  if (numbers.every(number => number.length === 3)) return 5000;
+  return 2500;
 };

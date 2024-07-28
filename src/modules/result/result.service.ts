@@ -163,8 +163,63 @@ export class ResultService extends BaseService<IResultDocument> {
       },
     ];
 
+    const ticketWonPipelineHalfKing = [
+      {
+        $match: {
+          time: {
+            $gte: new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate(), resultDate.getHours(), resultDate.getMinutes() - 5),
+            $lt: new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate(), resultDate.getHours(), resultDate.getMinutes() + 5),
+          },
+          place,
+          $or: [
+            {
+              ticket: `${
+                this.sumOfDigits(hasAlreadyPublished?.leftTicketNumber).toString()[
+                  this.sumOfDigits(hasAlreadyPublished?.leftTicketNumber).toString().length - 1
+                ]
+              }-${rightTicketNumber}`,
+            },
+            {
+              ticket: `${hasAlreadyPublished?.leftTicketNumber}-${
+                this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1]
+              }`,
+            },
+          ],
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          winnerCountHalfKing: { $count: {} }, // Count of documents for this place today
+          totalDistributedAmountHalfKing: { $sum: '$returns' }, // Total amount for this place today
+        },
+      },
+    ];
+
+    const ticketWonPipelineFullKing = [
+      {
+        $match: {
+          time: {
+            $gte: new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate(), resultDate.getHours(), resultDate.getMinutes() - 5),
+            $lt: new Date(resultDate.getFullYear(), resultDate.getMonth(), resultDate.getDate(), resultDate.getHours(), resultDate.getMinutes() + 5),
+          },
+          place,
+          ticket: `${hasAlreadyPublished?.leftTicketNumber}-${rightTicketNumber}`,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          winnerCountFullKing: { $count: {} }, // Count of documents for this place today
+          totalDistributedAmountFullKing: { $sum: '$returns' }, // Total amount for this place today
+        },
+      },
+    ];
+
     const winnerDetailsRight = await TicketService.repository.aggregate(ticketWonPipelineRight);
     const winnerDetailsDouble = await TicketService.repository.aggregate(ticketWonPipelineDouble);
+    const winnerDetailsHalfKing = await TicketService.repository.aggregate(ticketWonPipelineHalfKing);
+    const winnerDetailsFullKing = await TicketService.repository.aggregate(ticketWonPipelineFullKing);
 
     await this.repository.updateMany(
       {
@@ -177,19 +232,29 @@ export class ResultService extends BaseService<IResultDocument> {
           totalDistributedAmountRight: winnerDetailsRight[0]?.totalDistributedAmountRight || 0,
           winnerCountDouble: winnerDetailsDouble[0]?.winnerCountDouble || 0,
           totalDistributedAmountDouble: winnerDetailsDouble[0]?.totalDistributedAmountDouble || 0,
+          winnerCountHalfKing: winnerDetailsHalfKing[0]?.winnerCountHalfKing || 0,
+          totalDistributedAmountHalfKing: winnerDetailsHalfKing[0]?.totalDistributedAmountHalfKing || 0,
+          winnerCountFullKing: winnerDetailsFullKing[0]?.winnerCountFullKing || 0,
+          totalDistributedAmountFullKing: winnerDetailsFullKing[0]?.totalDistributedAmountFullKing || 0,
         },
       },
       { new: true },
     );
 
     await this.repository.updateOne({ time, place }, { $set: { rightTicketNumber } });
+
+    //right triple
     await this.updateTicketWonAndUser(time, place, 'Close', rightTicketNumber);
+
+    //right single
     await this.updateTicketWonAndUser(
       time,
       place,
       'Close',
       this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
     );
+
+    //double
     await this.updateTicketWonAndUser(
       time,
       place,
@@ -198,6 +263,30 @@ export class ResultService extends BaseService<IResultDocument> {
         this.sumOfDigits(hasAlreadyPublished?.leftTicketNumber).toString().length - 1
       ] + this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1],
     );
+
+    //half king
+    await this.updateTicketWonAndUser(
+      time,
+      place,
+      null,
+      `${
+        this.sumOfDigits(hasAlreadyPublished?.leftTicketNumber).toString()[
+          this.sumOfDigits(hasAlreadyPublished?.leftTicketNumber).toString().length - 1
+        ]
+      }-${rightTicketNumber}`,
+    );
+
+    await this.updateTicketWonAndUser(
+      time,
+      place,
+      null,
+      `${hasAlreadyPublished?.leftTicketNumber}-${
+        this.sumOfDigits(rightTicketNumber).toString()[this.sumOfDigits(rightTicketNumber).toString().length - 1]
+      }`,
+    );
+
+    //full king
+    await this.updateTicketWonAndUser(time, place, null, `${hasAlreadyPublished?.leftTicketNumber}-${rightTicketNumber}`);
     return {
       type: 'success',
       statusCode: 200,

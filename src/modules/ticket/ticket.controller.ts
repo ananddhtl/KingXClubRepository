@@ -3,7 +3,7 @@ import { HttpStatus } from '@nestjs/common';
 import TicketService from './ticket.service';
 import { BuyTicketDto } from './dtos/buy-ticket.dto';
 import { IUserDocument } from '../user/user.interface';
-import { findPana } from '@/utils/util';
+import { findKing, findPana } from '@/utils/util';
 import { UserService } from '../user/user.service';
 
 export class TicketController {
@@ -39,12 +39,16 @@ export class TicketController {
             ? amount * 150
             : findPana(ticket) === 2
             ? amount * 250
-            : amount * 490;
+            : findPana(ticket) === 3
+            ? amount * 490
+            : amount * findKing(ticket);
+
+        const positionForTicket = ticket.length === 2 || findPana(ticket) === 0 ? null : position;
 
         return {
           ticket,
           amount,
-          position,
+          position: positionForTicket,
           time: new Date(time),
           place,
           digit: ticket.length,
