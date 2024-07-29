@@ -20,7 +20,16 @@ export class UserService extends BaseService<IUserDocument> {
   }
 
   async getLoggedinUserDetails(userId: string): Promise<IUserDocument> {
-    const user = await this.repository.findById(userId);
+    const user = await this.repository.findById(userId).populate({
+      path: 'agent',
+      select: {
+        email: 1,
+        phone: 1,
+        name: 1,
+        address: 1,
+        country: 1,
+      },
+    });
 
     if (!user) {
       throw new HttpException(MessagesMapping['#9'], HttpStatus.NOT_FOUND);

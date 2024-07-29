@@ -3,6 +3,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import ResultService from './result.service';
 import { PublishResultDto } from './dtos/publish-result.dto';
 import httpStatus from 'http-status';
+import { CLUBS } from '@/constants';
 
 export class ResultController {
   static instance: null | ResultController;
@@ -21,6 +22,25 @@ export class ResultController {
     try {
       const { time, place, ticketNumber, position }: PublishResultDto = req.body;
       if (ticketNumber.length !== 3) throw new HttpException('Number must be 3 digit', httpStatus.CONFLICT);
+
+      const possibleTime = (CLUBS.find(club => club.place === place)?.time || [])
+        .map(timestamp => {
+          const time = new Date().setHours(
+            Number(timestamp.split(':')[0]) * 24 + Number(timestamp.split(':')[1]),
+            Number(timestamp.split(':')[2]),
+            0,
+            0,
+          );
+          if (Number(timestamp.split(':')[0]) === 1) {
+            const previousTime = new Date().setHours(Number(timestamp.split(':')[1]), Number(timestamp.split(':')[2]), 0, 0);
+            return [time, previousTime];
+          }
+          return time;
+        })
+        .flat();
+
+      if (!possibleTime.includes(time)) throw new HttpException('Result Time doesnot match, please try again', httpStatus.CONFLICT);
+
       const response =
         position === 'Open'
           ? await this.resultService.publishLeftResult(time, place, ticketNumber)

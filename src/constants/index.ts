@@ -1,11 +1,22 @@
-export enum ROLES {
-  ADMIN = 'admin',
-  EVENT_MANAGER = 'event_manager',
-  STALL_OWNER = 'stall_owner',
-  USER = 'user',
-}
-
-export const POINTS = {
-  claims: 10,
-  farming: 10,
-} as const;
+export const CLUBS = [
+  {
+    place: 'Club Panther',
+    time: ['00:07:00', '00:13:00', '00:17:00', '01:01:00'],
+  },
+  {
+    place: 'Club Tiger',
+    time: ['00:08:00', '00:14:00', '00:18:00', '00:22:00'],
+  },
+  {
+    place: 'Club Lion',
+    time: ['00:09:00', '00:13:00', '00:19:00', '00:23:00'],
+  },
+  {
+    place: 'Club Puma',
+    time: ['00:10:00', '00:16:00', '00:20:00', '01:00:00'],
+  },
+  {
+    place: 'Club Cobra',
+    time: ['00:11:00', '00:17:00', '00:21:00', '01:02:00'],
+  },
+];

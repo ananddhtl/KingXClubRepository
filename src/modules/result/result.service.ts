@@ -110,6 +110,9 @@ export class ResultService extends BaseService<IResultDocument> {
 
   async publishRightResult(time: number, place: string, rightTicketNumber: string) {
     const hasAlreadyPublished = await this.repository.findOne({ time, place });
+    console.log({ hasAlreadyPublished });
+
+    if (!hasAlreadyPublished) throw new HttpException('Please release Open result first', httpStatus.CONFLICT);
 
     if (hasAlreadyPublished && hasAlreadyPublished?.rightTicketNumber)
       throw new HttpException('close position result already released', httpStatus.CONFLICT);

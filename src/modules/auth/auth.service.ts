@@ -164,9 +164,20 @@ export class AuthService {
   }
 
   private async getAuthenticatedUser(email: string, plainTextPassword: string): Promise<IUserDocument> {
-    const user = await this.userRepository.findOne({
-      email,
-    });
+    const user = await this.userRepository
+      .findOne({
+        email,
+      })
+      .populate({
+        path: 'agent',
+        select: {
+          email: 1,
+          phone: 1,
+          name: 1,
+          address: 1,
+          country: 1,
+        },
+      });
 
     if (!user) {
       throw new HttpException(MessagesMapping['#9'], HttpStatus.NOT_FOUND);
