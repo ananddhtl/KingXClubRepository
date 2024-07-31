@@ -50,6 +50,6 @@ export const findPana = (value: string) => {
 export const findKing = (value: string) => {
   const numbers = value.split('-');
   if (numbers.length !== 2) return 0;
-  if (numbers.every(number => number.length === 3)) return 5000;
-  return 2500;
+  if (numbers.every(number => number.length === 3)) return 10000;
+  return 1000;
 };

@@ -98,7 +98,7 @@ export class TicketController {
       {
         $match: {
           time: {
-            $gte: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1),
+            $gte: new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours() - 5),
             $lt: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2),
           },
         },
@@ -109,7 +109,7 @@ export class TicketController {
       {
         $match: {
           time: {
-            $gte: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1),
+            $gte: new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours() - 5),
             $lt: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2),
           },
         },
@@ -145,14 +145,14 @@ export class TicketController {
       userFilter.length > 0
         ? {
             time: {
-              $gte: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1),
+              $gte: new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours() - 5),
               $lt: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2),
             },
             $or: userFilter,
           }
         : {
             time: {
-              $gte: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1),
+              $gte: new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours() - 5),
               $lt: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2),
             },
           };
