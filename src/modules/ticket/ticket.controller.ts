@@ -72,8 +72,8 @@ export class TicketController {
       {
         $match: {
           time: {
-            $gte: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
-            $lt: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
+            $gte: new Date(today.getFullYear(), today.getMonth(), today.getHours()),
+            $lt: new Date(today.getFullYear(), today.getMonth(), today.getHours() + 1),
           },
         },
       },
@@ -194,8 +194,8 @@ export class TicketController {
       {
         $match: {
           time: {
-            $gte: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 5),
-            $lt: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
+            $gte: new Date(today.getFullYear(), today.getMonth(), today.getHours() - 5),
+            $lt: new Date(today.getFullYear(), today.getMonth(), today.getHours() + 1),
           },
           won: true, // Filter for documents where 'won' is true
         },
