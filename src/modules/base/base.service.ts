@@ -52,7 +52,7 @@ export abstract class BaseService<T> implements IBaseService<Document> {
       data = item;
     }
 
-    return await this.repository.updateOne({ _id: id }, data);
+    return await item.save();
   }
 
   async updateOne(filter: object, update: object): Promise<any> {
