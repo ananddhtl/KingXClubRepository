@@ -15,7 +15,7 @@ import UserModel from '../user/user.modal';
 import { IUserDocument } from '../user/user.interface';
 import { ITokenDocument, TokenTypes } from './token.interface';
 import TokenModal from './token.modal';
-import { MailService } from '@/services/mail.service';
+// import { MailService } from '@/services/mail.service';
 import { AuthConfig } from '@/config';
 
 export class AuthService {
@@ -26,8 +26,8 @@ export class AuthService {
     private readonly userRepository = UserModel,
     private readonly tokenRepository = TokenModal,
     private readonly configService = AuthConfig,
-    private readonly mailService = new MailService(),
   ) {}
+  // private readonly mailService = new MailService(),
 
   static getInstance() {
     if (!this.instance) {
@@ -204,7 +204,7 @@ export class AuthService {
 
     await user.save();
 
-    await this.mailService.sendAfterResetPasswordEmail(user.email);
+    // await this.mailService.sendAfterResetPasswordEmail(user.email);
 
     return {
       message: MessagesMapping['#8'],
@@ -222,7 +222,7 @@ export class AuthService {
 
     const resetPasswordToken = await this.generateResetPasswordToken(forgotPasswordDto.email);
 
-    await this.mailService.sendResetPasswordEmail(user.email, resetPasswordToken);
+    // await this.mailService.sendResetPasswordEmail(user.email, resetPasswordToken);
 
     return {
       token: resetPasswordToken,
