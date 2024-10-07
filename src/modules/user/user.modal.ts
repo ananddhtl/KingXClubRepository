@@ -51,7 +51,7 @@ const UserSchema: Schema<IUserDocument> = new Schema({
     unique: true,
     sparse: true,
   },
-  amount: { type: Number, default: 0, min: 0 },
+  amount: { type: Number, default: 50, min: 0 },
   createdAt: { type: Date, default: Date.now },
 });
 
